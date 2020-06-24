@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  lautasofta-service SAM template
+
+Parameters:
+  DbHost:
+    Type: String
+  DbUser:
+    Type: String
+  DbPasswd:
+    Type: String
+  DbName:
+    Type: String
+
+Resources:
+  ApiHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: service/
+      Handler: api.app.lambda_handler
+      Runtime: python3.8
+      Timeout: 3
+      Environment:
+        Variables:
+          DB_HOST:    !Ref DbHost
+          DB_USER:    !Ref DbUser
+          DB_PASSWD:  !Ref DbPasswd
+          DB_NAME:    !Ref DbName
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /boards
+            Method: get

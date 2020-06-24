@@ -1,0 +1,8 @@
+{
+  "Parameters": {
+    "DB_HOST":    "localhost",
+    "DB_USER":    "root",
+    "DB_PASSWD":  "root",
+    "DB_NAME":    "lautasofta"
+  }
+}
