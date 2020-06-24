@@ -4,25 +4,20 @@ from flask import (
   Flask,
   jsonify
 )
-from api.dbmodels import DbModels
+from api.api_boards import (
+  select_boards
+)
 
 # init flask app
 app = Flask(__name__)
-
-# init db schema
-db_models = DbModels()
 
 @app.route('/boards')
 def api_get_boards():
   """Returns a list of accessible boards"""
 
-  return jsonify({
-    'status': 200,
-    'message': [
-      'board1',
-      'board2'
-    ]
-  })
+  result = select_boards()
+
+  return jsonify(status=result['status'], message=result['data'])
 
 def lambda_handler(evt, ctx):
   """AWS Lambda entrypoint"""

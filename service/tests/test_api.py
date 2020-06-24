@@ -67,3 +67,5 @@ def test_api_get_boards():
   assert res['statusCode'] == '200'
   assert 'message' in res['body']
   assert bdy['message'] is not None
+  assert bdy['message'][0]['path'] == 'b'
+  assert bdy['message'][1]['path'] == 'a'

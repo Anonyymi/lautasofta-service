@@ -1,4 +1,3 @@
 aws-wsgi
 flask
 pymysql
-pony
