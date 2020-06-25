@@ -1,8 +1,10 @@
 {
   "Parameters": {
-    "DB_HOST":    "localhost",
-    "DB_USER":    "root",
-    "DB_PASSWD":  "root",
-    "DB_NAME":    "lautasofta"
+    "DB_HOST":          "localhost",
+    "DB_USER":          "root",
+    "DB_PASSWD":        "root",
+    "DB_NAME":          "lautasofta",
+    "MEDIA_BUCKET":     "lautasofta-local-media",
+    "S3_ENDPOINT_URL":  "http://localhost:4572"
   }
 }

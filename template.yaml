@@ -6,14 +6,33 @@ Description: >
 Parameters:
   DbHost:
     Type: String
+    Default: localhost
   DbUser:
     Type: String
+    Default: root
   DbPasswd:
     Type: String
+    Default: root
   DbName:
     Type: String
+    Default: lautasofta
+  MediaBucketName:
+    Type: String
+    Default: lautasofta-local-media
+  S3EndpointUrl:
+    Type: String
+    Default: http://localhost:4572
 
 Resources:
+  MediaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref MediaBucketName
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireObjects
+            Status: 'Enabled'
+            ExpirationInDays: 30
   ApiHandler:
     Type: AWS::Serverless::Function
     Properties:
@@ -23,10 +42,12 @@ Resources:
       Timeout: 3
       Environment:
         Variables:
-          DB_HOST:    !Ref DbHost
-          DB_USER:    !Ref DbUser
-          DB_PASSWD:  !Ref DbPasswd
-          DB_NAME:    !Ref DbName
+          DB_HOST:          !Ref DbHost
+          DB_USER:          !Ref DbUser
+          DB_PASSWD:        !Ref DbPasswd
+          DB_NAME:          !Ref DbName
+          MEDIA_BUCKET:     !Ref MediaBucket
+          S3_ENDPOINT_URL:  !Ref S3EndpointUrl
       Events:
         Api:
           Type: Api
