@@ -52,5 +52,5 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /boards
-            Method: get
+            Path: /{proxy+}
+            Method: ANY

@@ -1,13 +1,14 @@
 from api.dbinstance import DbInstance
 
 def select_boards():
+  # prepare result
   result = {
     'status': 404,
     'data': None
   }
-
+  # fetch rows from db
   with DbInstance().instance.cursor() as cursor:
-    query = """
+    cursor.execute("""
       SELECT
         b.id AS id,
         b.path AS path,
@@ -17,11 +18,9 @@ def select_boards():
         b.flag_nsfw AS flag_nsfw
       FROM boards AS b
       ORDER BY b.id ASC
-    """
-    cursor.execute(query)
+    """)
     result['data'] = cursor.fetchall()
-  
+  # update result
   if result['data']:
     result['status'] = 200
-  
   return result
