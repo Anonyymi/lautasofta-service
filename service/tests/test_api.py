@@ -1,7 +1,7 @@
 import json
 import pytest
 
-import tests.set_env
+import common.set_env
 from api import app
 
 def gen_apigw_event(resource, method, body, query):
@@ -65,7 +65,7 @@ def test_api_get_boards():
   bdy = json.loads(res['body'])
 
   assert res['statusCode'] == '200'
-  assert 'message' in res['body']
-  assert bdy['message'] is not None
-  assert bdy['message'][0]['path'] == 'b'
-  assert bdy['message'][1]['path'] == 'a'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data'][0]['path'] == 'b'
+  assert bdy['data'][1]['path'] == 'a'

@@ -1,3 +1,9 @@
+import os
+
+# init os.environ from file if not initialized
+if os.getenv('DB_HOST') is None:
+  import common.set_env
+
 import json
 import awsgi
 from flask import (

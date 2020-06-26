@@ -1,6 +1,8 @@
 import os
 import json
 
+print(f'WARNING: loading environment variables from local_env.json...')
+
 env = json.load(open('local_env.json'))
 
 for key,val in env['Parameters'].items():
