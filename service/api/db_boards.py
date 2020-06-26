@@ -1,4 +1,4 @@
-from api.dbinstance import DbInstance
+from common.dbinstance import DbInstance
 
 def select_boards():
   # prepare result

@@ -25,7 +25,7 @@ def api_get_boards():
   """Returns a list of accessible boards"""
   # get results from db
   result = select_boards()
-  return jsonify(status=result['status'], message=result['data'])
+  return jsonify(result)
 
 @app.route('/boards/<int:board_id>/threads', methods=['GET'])
 def api_get_threads(board_id):
@@ -40,14 +40,14 @@ def api_get_threads(board_id):
     arg_offset = 0
   # get results from db
   result = select_threads(board_id, arg_limit, arg_offset)
-  return jsonify(status=result['status'], message=result['data'])
+  return jsonify(result)
 
 @app.route('/boards/<int:board_id>/threads', methods=['POST'])
 def api_post_thread(board_id):
   """Creates a new thread"""
   # insert content to db
   result = insert_thread(board_id, request.json)
-  return jsonify(status=result['status'], message=result['data'])
+  return jsonify(result)
 
 @app.route('/boards/<int:board_id>/threads/<int:thread_id>/posts', methods=['GET'])
 def api_get_posts(board_id, thread_id):
@@ -62,14 +62,14 @@ def api_get_posts(board_id, thread_id):
     arg_offset = 0
   # get results from db
   result = select_posts(board_id, thread_id, arg_limit, arg_offset)
-  return jsonify(status=result['status'], message=result['data'])
+  return jsonify(result)
 
 @app.route('/boards/<int:board_id>/threads/<int:thread_id>/posts', methods=['POST'])
 def api_post_post(board_id, thread_id):
   """Creates a new post"""
   # insert content to db
   result = insert_post(board_id, thread_id, request.json)
-  return jsonify(status=result['status'], message=result['data'])
+  return jsonify(result)
 
 def lambda_handler(evt, ctx):
   """AWS Lambda entrypoint"""
