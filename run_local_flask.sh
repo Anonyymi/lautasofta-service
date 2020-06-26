@@ -10,4 +10,4 @@ flyway -configFiles=./database/flyway.conf migrate
 aws --endpoint-url http://localhost:4581 cloudformation deploy \
     --template-file "./.aws-sam//build/template.yaml" \
     --stack-name "lautasofta-service"
-FLASK_APP=./service/api/app.py flask run --port 3000
+FLASK_APP=./service/api/app.py flask run --port 3002

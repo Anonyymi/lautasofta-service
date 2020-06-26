@@ -11,4 +11,4 @@ sam build --use-container
 aws --endpoint-url http://localhost:4581 cloudformation deploy \
     --template-file "./.aws-sam//build/template.yaml" \
     --stack-name "lautasofta-service"
-sam local start-api --env-vars local_env.json --docker-network host
+sam local start-api --env-vars local_env.json --port 3002 --docker-network host

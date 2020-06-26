@@ -1,8 +1,7 @@
 import os
 import pymysql.cursors
-from common.singleton import Singleton
 
-class DbInstance(metaclass=Singleton):
+class DbInstance():
   instance: pymysql.Connection
 
   def __init__(self):
