@@ -10,7 +10,7 @@ def select_threads(board_id, limit, offset):
     'data': None
   }
   # fetch rows from db
-  with DbInstance().instance.cursor() as cursor:
+  with DbInstance().get_instance().cursor() as cursor:
     cursor.execute("""
       SELECT
         p.id AS id,
@@ -52,7 +52,7 @@ def insert_thread(board_id, thread):
     ExpiresIn=60
   )
   # insert row to db
-  with DbInstance().instance.cursor() as cursor:
+  with DbInstance().get_instance().cursor() as cursor:
     rows = cursor.execute("""
       INSERT INTO posts (board_id, data_message, data_filepath)
       VALUES (%s, %s, %s)

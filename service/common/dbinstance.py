@@ -13,3 +13,7 @@ class DbInstance(metaclass=Singleton):
       db=           os.getenv('DB_NAME'),
       cursorclass=  pymysql.cursors.DictCursor
     )
+  
+  def get_instance(self):
+    self.instance.ping(reconnect=True)
+    return self.instance

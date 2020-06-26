@@ -11,6 +11,9 @@ from flask import (
   request,
   jsonify
 )
+from flask_cors import (
+  CORS
+)
 from api.db_boards import (
   select_boards
 )
@@ -25,6 +28,11 @@ from api.db_posts import (
 
 # init flask app
 app = Flask(__name__)
+CORS(app, resources={
+  r'/*': {
+    'origins': '*'
+  }
+})
 
 @app.route('/boards', methods=['GET'])
 def api_get_boards():

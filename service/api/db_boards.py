@@ -7,7 +7,7 @@ def select_boards():
     'data': None
   }
   # fetch rows from db
-  with DbInstance().instance.cursor() as cursor:
+  with DbInstance().get_instance().cursor() as cursor:
     cursor.execute("""
       SELECT
         b.id AS id,
