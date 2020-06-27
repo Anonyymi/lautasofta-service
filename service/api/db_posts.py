@@ -18,8 +18,8 @@ def select_posts(board_id, thread_id, limit, offset):
         p.thread_id AS thread_id,
         p.data_message AS data_message,
         p.data_filepath AS data_filepath,
-        p.datetime_created AS datetime_created,
-        p.timestamp_edited AS timestamp_edited
+        DATE_FORMAT(p.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
+        DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited
       FROM posts AS p
       WHERE p.board_id = %s AND p.thread_id = %s OR p.id = %s
       ORDER BY p.datetime_created ASC
