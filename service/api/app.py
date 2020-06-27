@@ -38,7 +38,8 @@ CORS(app, resources={
 def api_get_config():
   """Returns a configuration object for the requesting client"""
   result = {
-    'S3_MEDIA_BUCKET_URL': os.getenv('S3_ENDPOINT_URL') + '/' + os.getenv('MEDIA_BUCKET')
+    'MEDIA_BUCKET_URL': os.getenv('S3_ENDPOINT_URL') + '/' + os.getenv('MEDIA_BUCKET'),
+    'MEDIA_CONTENT_TYPES': ['png', 'jpg', 'jpeg', 'gif']
   }
   return jsonify(status=200, data=result)
 
