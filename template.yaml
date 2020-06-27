@@ -21,7 +21,7 @@ Parameters:
     Default: lautasofta-local-media
   S3EndpointUrl:
     Type: String
-    Default: http://localhost:4572
+    Default: http://localhost:4566
 
 Resources:
   MediaBucket:
