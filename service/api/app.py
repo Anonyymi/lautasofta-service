@@ -14,6 +14,9 @@ from flask import (
 from flask_cors import (
   CORS
 )
+from werkzeug.middleware.proxy_fix import (
+  ProxyFix
+)
 from common.config import config
 from api.db_boards import (
   select_boards
@@ -34,6 +37,7 @@ CORS(app, resources={
     'origins': '*'
   }
 })
+ProxyFix(app.wsgi_app, 1)
 
 @app.route('/config', methods=['GET'])
 def api_get_config():
@@ -65,12 +69,14 @@ def api_get_threads(board_id):
 @app.route('/boards/<int:board_id>/threads', methods=['POST'])
 def api_post_thread(board_id):
   """Creates a new thread"""
+  # parse request env
+  ipv4_addr = request.environ.get('REMOTE_ADDR', request.remote_addr)
   # validate body
   body = request.json
   if body['extension'] and body['extension'] not in config['MEDIA_CONTENT_TYPES']:
     body['extension'] = None
   # insert content to db
-  result = insert_thread(board_id, body)
+  result = insert_thread(board_id, body, ipv4_addr)
   return jsonify(result)
 
 @app.route('/boards/<int:board_id>/threads/<int:thread_id>/posts', methods=['GET'])
@@ -91,12 +97,14 @@ def api_get_posts(board_id, thread_id):
 @app.route('/boards/<int:board_id>/threads/<int:thread_id>/posts', methods=['POST'])
 def api_post_post(board_id, thread_id):
   """Creates a new post"""
+  # parse request env
+  ipv4_addr = request.environ.get('REMOTE_ADDR', request.remote_addr)
   # validate body
   body = request.json
   if body['extension'] and body['extension'] not in config['MEDIA_CONTENT_TYPES']:
     body['extension'] = None
   # insert content to db
-  result = insert_post(board_id, thread_id, body)
+  result = insert_post(board_id, thread_id, body, ipv4_addr)
   return jsonify(result)
 
 def lambda_handler(evt, ctx):

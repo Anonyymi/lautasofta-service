@@ -48,7 +48,7 @@ def select_threads(board_id, limit, offset):
     result['status'] = 200
   return result
 
-def insert_thread(board_id, thread):
+def insert_thread(board_id, thread, ipv4_addr):
   # prepare result
   result = {
     'status': 400,
@@ -77,14 +77,22 @@ def insert_thread(board_id, thread):
     )
   # insert row to db
   with DbInstance().get_instance().cursor() as cursor:
-    rows = cursor.execute("""
-      INSERT INTO posts (board_id, data_message, data_filepath)
-      VALUES (%s, %s, %s)
-    """, (board_id, thread['message'], file_upload_info['fields']['key'],))
-    if rows == 1:
+    # insert/update ipv4_addr row
+    rows_anon = cursor.execute("""
+      INSERT INTO anons (ipv4_addr) VALUES (INET_ATON(%s))
+      ON DUPLICATE KEY UPDATE timestamp_posted=CURRENT_TIMESTAMP
+    """, (ipv4_addr,))
+    # insert thread
+    rows_thread = cursor.execute("""
+      INSERT INTO posts (board_id, data_message, data_filepath, ipv4_addr)
+      VALUES (%s, %s, %s, INET_ATON(%s))
+    """, (board_id, thread['message'], file_upload_info['fields']['key'], ipv4_addr,))
+    id_inserted = cursor.lastrowid
+    # commit if ok
+    if rows_anon >= 1 and rows_thread == 1:
       cursor.connection.commit()
       result['data'] = {
-        'id': cursor.lastrowid,
+        'id': id_inserted,
         'url': file_upload_info['url'],
         'fields': file_upload_info['fields']
       }

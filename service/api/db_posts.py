@@ -31,7 +31,7 @@ def select_posts(board_id, thread_id, limit, offset):
     result['status'] = 200
   return result
 
-def insert_post(board_id, thread_id, post):
+def insert_post(board_id, thread_id, post, ipv4_addr):
   # prepare result
   result = {
     'status': 400,
@@ -60,19 +60,25 @@ def insert_post(board_id, thread_id, post):
     )
   # insert row to db
   with DbInstance().get_instance().cursor() as cursor:
+    # insert/update ipv4_addr row
+    rows_anon = cursor.execute("""
+      INSERT INTO anons (ipv4_addr) VALUES (INET_ATON(%s))
+      ON DUPLICATE KEY UPDATE timestamp_posted=CURRENT_TIMESTAMP
+    """, (ipv4_addr,))
     # insert post
-    rows_insert = cursor.execute("""
-      INSERT INTO posts (board_id, thread_id, data_message, data_filepath)
-      VALUES (%s, %s, %s, %s)
-    """, (board_id, thread_id, post['message'], file_upload_info['fields']['key'],))
+    rows_post = cursor.execute("""
+      INSERT INTO posts (board_id, thread_id, data_message, data_filepath, ipv4_addr)
+      VALUES (%s, %s, %s, %s, INET_ATON(%s))
+    """, (board_id, thread_id, post['message'], file_upload_info['fields']['key'], ipv4_addr,))
     id_inserted = cursor.lastrowid
     # update thread
-    rows_update = cursor.execute("""
+    rows_thread = cursor.execute("""
       UPDATE posts
       SET timestamp_bumped = CURRENT_TIMESTAMP
       WHERE board_id = %s AND id = %s;
     """, (board_id, thread_id,))
-    if rows_insert == 1 and rows_update == 1:
+    # commit if ok
+    if rows_anon >= 1 and rows_post == 1 and rows_thread == 1:
       cursor.connection.commit()
       result['data'] = {
         'id': id_inserted,
