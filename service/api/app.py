@@ -34,6 +34,14 @@ CORS(app, resources={
   }
 })
 
+@app.route('/config', methods=['GET'])
+def api_get_config():
+  """Returns a configuration object for the requesting client"""
+  result = {
+    'S3_MEDIA_BUCKET_URL': os.getenv('S3_ENDPOINT_URL') + '/' + os.getenv('MEDIA_BUCKET')
+  }
+  return jsonify(status=200, data=result)
+
 @app.route('/boards', methods=['GET'])
 def api_get_boards():
   """Returns a list of accessible boards"""

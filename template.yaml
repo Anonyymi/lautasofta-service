@@ -33,6 +33,11 @@ Resources:
           - Id: ExpireObjects
             Status: 'Enabled'
             ExpirationInDays: 30
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: False
+        BlockPublicPolicy: True
+        IgnorePublicAcls: False
+        RestrictPublicBuckets: False
   ApiHandler:
     Type: AWS::Serverless::Function
     Properties:

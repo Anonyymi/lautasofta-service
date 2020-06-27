@@ -37,20 +37,27 @@ def insert_post(board_id, thread_id, post):
     'status': 400,
     'data': None
   }
-  # generate presigned s3 url for the file
-  file_upload_info = S3Client().instance.generate_presigned_post(
-    os.getenv('MEDIA_BUCKET'),
-    str(uuid.uuid4()) + '.' + post['extension'],
-    Fields={
-      'acl': 'public-read'
+  # if requested, generate presigned s3 POST url for the file
+  file_upload_info = {
+    'url': None,
+    'fields': {
+      'key': None
     },
-    Conditions=[
-      ['acl', 'public-read'],
-      ['content-type', post['extension']],
-      ['content-length-range', 128, 4096000]
-    ],
-    ExpiresIn=60
-  )
+  }
+  if post['extension'] is not None:
+    file_upload_info = S3Client().instance.generate_presigned_post(
+      os.getenv('MEDIA_BUCKET'),
+      str(uuid.uuid4()) + '.' + post['extension'],
+      Fields={
+        'acl': 'public-read'
+      },
+      Conditions=[
+        ['acl', 'public-read'],
+        ['content-type', post['extension']],
+        ['content-length-range', 128, 4096000]
+      ],
+      ExpiresIn=60
+    )
   # insert row to db
   with DbInstance().get_instance().cursor() as cursor:
     rows = cursor.execute("""
