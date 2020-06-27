@@ -22,7 +22,7 @@ def select_threads(board_id, limit, offset):
         DATE_FORMAT(t.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited
       FROM posts AS t
       WHERE t.board_id = %s AND t.thread_id IS NULL
-      ORDER BY t.timestamp_edited DESC, t.datetime_created DESC
+      ORDER BY t.timestamp_bumped DESC
       LIMIT %s OFFSET %s
     """, (board_id, limit, offset,))
     result['data'] = cursor.fetchall()

@@ -60,14 +60,22 @@ def insert_post(board_id, thread_id, post):
     )
   # insert row to db
   with DbInstance().get_instance().cursor() as cursor:
-    rows = cursor.execute("""
+    # insert post
+    rows_insert = cursor.execute("""
       INSERT INTO posts (board_id, thread_id, data_message, data_filepath)
       VALUES (%s, %s, %s, %s)
     """, (board_id, thread_id, post['message'], file_upload_info['fields']['key'],))
-    if rows == 1:
+    id_inserted = cursor.lastrowid
+    # update thread
+    rows_update = cursor.execute("""
+      UPDATE posts
+      SET timestamp_bumped = CURRENT_TIMESTAMP
+      WHERE board_id = %s AND id = %s;
+    """, (board_id, thread_id,))
+    if rows_insert == 1 and rows_update == 1:
       cursor.connection.commit()
       result['data'] = {
-        'id': cursor.lastrowid,
+        'id': id_inserted,
         'url': file_upload_info['url'],
         'fields': file_upload_info['fields']
       }
