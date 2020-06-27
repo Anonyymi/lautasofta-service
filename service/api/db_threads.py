@@ -40,9 +40,9 @@ def select_threads(board_id, limit, offset):
           FROM posts AS p
           WHERE p.board_id = %s AND p.thread_id = %s
           ORDER BY p.datetime_created DESC
-          LIMIT %s OFFSET %s
-        """, (board_id, item['id'], 3, 0,))
-        item['posts'] = cursor.fetchall()
+          LIMIT 3 OFFSET 0
+        """, (board_id, item['id']))
+        item['posts'] = sorted(cursor.fetchall(), key=lambda p: p['id'])
   # update result
   if result['data']:
     result['status'] = 200

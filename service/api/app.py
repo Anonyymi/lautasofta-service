@@ -14,6 +14,7 @@ from flask import (
 from flask_cors import (
   CORS
 )
+from common.config import config
 from api.db_boards import (
   select_boards
 )
@@ -37,11 +38,7 @@ CORS(app, resources={
 @app.route('/config', methods=['GET'])
 def api_get_config():
   """Returns a configuration object for the requesting client"""
-  result = {
-    'MEDIA_BUCKET_URL': os.getenv('S3_ENDPOINT_URL') + '/' + os.getenv('MEDIA_BUCKET'),
-    'MEDIA_CONTENT_TYPES': ['png', 'jpg', 'jpeg', 'gif']
-  }
-  return jsonify(status=200, data=result)
+  return jsonify(status=200, data=config)
 
 @app.route('/boards', methods=['GET'])
 def api_get_boards():
@@ -68,8 +65,12 @@ def api_get_threads(board_id):
 @app.route('/boards/<int:board_id>/threads', methods=['POST'])
 def api_post_thread(board_id):
   """Creates a new thread"""
+  # validate body
+  body = request.json
+  if body['extension'] and body['extension'] not in config['MEDIA_CONTENT_TYPES']:
+    body['extension'] = None
   # insert content to db
-  result = insert_thread(board_id, request.json)
+  result = insert_thread(board_id, body)
   return jsonify(result)
 
 @app.route('/boards/<int:board_id>/threads/<int:thread_id>/posts', methods=['GET'])
@@ -90,8 +91,12 @@ def api_get_posts(board_id, thread_id):
 @app.route('/boards/<int:board_id>/threads/<int:thread_id>/posts', methods=['POST'])
 def api_post_post(board_id, thread_id):
   """Creates a new post"""
+  # validate body
+  body = request.json
+  if body['extension'] and body['extension'] not in config['MEDIA_CONTENT_TYPES']:
+    body['extension'] = None
   # insert content to db
-  result = insert_post(board_id, thread_id, request.json)
+  result = insert_post(board_id, thread_id, body)
   return jsonify(result)
 
 def lambda_handler(evt, ctx):
