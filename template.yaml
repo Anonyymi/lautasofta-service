@@ -43,7 +43,7 @@ Resources:
     Properties:
       CodeUri: service/
       Handler: api.app.lambda_handler
-      Runtime: python3.8
+      Runtime: python3.7
       Timeout: 3
       Environment:
         Variables:
