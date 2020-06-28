@@ -27,7 +27,8 @@ from api.db_threads import (
 )
 from api.db_posts import (
   select_posts,
-  insert_post
+  insert_post,
+  delete_post
 )
 
 # init flask app
@@ -105,6 +106,15 @@ def api_post_post(board_id, thread_id):
     body['extension'] = None
   # insert content to db
   result = insert_post(board_id, thread_id, body, ipv4_addr)
+  return jsonify(result)
+
+@app.route('/posts/<int:post_id>', methods=['DELETE'])
+def api_delete_post(post_id):
+  """Deletes a post (thread or post)"""
+  # parse request env
+  ipv4_addr = request.environ.get('REMOTE_ADDR', request.remote_addr)
+  # delete content from db
+  result = delete_post(post_id, ipv4_addr)
   return jsonify(result)
 
 def lambda_handler(evt, ctx):

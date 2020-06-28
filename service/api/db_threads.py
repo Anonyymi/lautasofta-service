@@ -21,7 +21,7 @@ def select_threads(board_id, limit, offset):
         DATE_FORMAT(t.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
         DATE_FORMAT(t.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited
       FROM posts AS t
-      WHERE t.board_id = %s AND t.thread_id IS NULL
+      WHERE (t.board_id = %s AND t.thread_id IS NULL) AND t.deleted = false
       ORDER BY t.timestamp_bumped DESC
       LIMIT %s OFFSET %s
     """, (board_id, limit, offset,))
@@ -38,7 +38,7 @@ def select_threads(board_id, limit, offset):
             DATE_FORMAT(p.datetime_created, '%%m/%%d/%%y(%%a)%%T')  AS datetime_created,
             DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited
           FROM posts AS p
-          WHERE p.board_id = %s AND p.thread_id = %s
+          WHERE (p.board_id = %s AND p.thread_id = %s) AND p.deleted = false
           ORDER BY p.datetime_created DESC
           LIMIT 3 OFFSET 0
         """, (board_id, item['id']))

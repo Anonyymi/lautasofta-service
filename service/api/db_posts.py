@@ -21,7 +21,7 @@ def select_posts(board_id, thread_id, limit, offset):
         DATE_FORMAT(p.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
         DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited
       FROM posts AS p
-      WHERE p.board_id = %s AND p.thread_id = %s OR p.id = %s
+      WHERE (p.board_id = %s AND p.thread_id = %s OR p.id = %s) AND p.deleted = false
       ORDER BY p.datetime_created ASC
       LIMIT %s OFFSET %s
     """, (board_id, thread_id, thread_id, limit, offset,))
@@ -88,4 +88,34 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
   # update result
   if result['data']:
     result['status'] = 201
+  return result
+
+def delete_post(post_id, ipv4_add):
+  # prepare result
+  result = {
+    'status': 401,
+    'data': None
+  }
+  # delete row from db
+  with DbInstance().get_instance().cursor() as cursor:
+    # delete post
+    rows_post = cursor.execute("""
+      UPDATE posts
+      SET deleted = true
+      WHERE
+        id = %s
+      AND
+        ipv4_addr = INET_ATON(%s)
+      AND
+        datetime_created > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
+    """, (post_id, ipv4_add,))
+    # commit if ok
+    if rows_post >= 1:
+      cursor.connection.commit()
+      result['data'] = {
+        'affected': rows_post
+      }
+  # update result
+  if result['data']:
+    result['status'] = 200
   return result
