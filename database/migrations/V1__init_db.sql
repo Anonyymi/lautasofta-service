@@ -33,3 +33,15 @@ CREATE TABLE posts (
   FOREIGN KEY (thread_id) REFERENCES posts(id) ON DELETE CASCADE,
   FOREIGN KEY (ipv4_addr) REFERENCES anons(ipv4_addr) ON DELETE CASCADE
 );
+
+-- NOTE: requires event_scheduler=ON configuration
+CREATE EVENT AutoDeleteOldPosts
+ON SCHEDULE EVERY 1 DAY STARTS CURRENT_TIMESTAMP
+DO
+  DELETE LOW_PRIORITY
+  FROM posts
+  WHERE
+    thread_id IS NULL
+  AND
+    datetime_created < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 MONTH)
+;

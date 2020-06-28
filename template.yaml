@@ -28,16 +28,12 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref MediaBucketName
+      # NOTE: check database/migrations/V1__init_db.sql::AutoDeleteOldPosts
       LifecycleConfiguration:
         Rules:
           - Id: ExpireObjects
             Status: 'Enabled'
             ExpirationInDays: 30
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: False
-        BlockPublicPolicy: True
-        IgnorePublicAcls: False
-        RestrictPublicBuckets: False
   ApiHandler:
     Type: AWS::Serverless::Function
     Properties:
