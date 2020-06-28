@@ -50,7 +50,7 @@ def api_get_boards():
   """Returns a list of accessible boards"""
   # get results from db
   result = select_boards()
-  return jsonify(result)
+  return jsonify(result), result['status']
 
 @app.route('/boards/<int:board_id>/threads', methods=['GET'])
 def api_get_threads(board_id):
@@ -65,7 +65,7 @@ def api_get_threads(board_id):
     arg_offset = 0
   # get results from db
   result = select_threads(board_id, arg_limit, arg_offset)
-  return jsonify(result)
+  return jsonify(result), result['status']
 
 @app.route('/boards/<int:board_id>/threads', methods=['POST'])
 def api_post_thread(board_id):
@@ -78,7 +78,7 @@ def api_post_thread(board_id):
     body['extension'] = None
   # insert content to db
   result = insert_thread(board_id, body, ipv4_addr)
-  return jsonify(result)
+  return jsonify(result), result['status']
 
 @app.route('/boards/<int:board_id>/threads/<int:thread_id>/posts', methods=['GET'])
 def api_get_posts(board_id, thread_id):
@@ -93,7 +93,7 @@ def api_get_posts(board_id, thread_id):
     arg_offset = 0
   # get results from db
   result = select_posts(board_id, thread_id, arg_limit, arg_offset)
-  return jsonify(result)
+  return jsonify(result), result['status']
 
 @app.route('/boards/<int:board_id>/threads/<int:thread_id>/posts', methods=['POST'])
 def api_post_post(board_id, thread_id):
@@ -106,7 +106,7 @@ def api_post_post(board_id, thread_id):
     body['extension'] = None
   # insert content to db
   result = insert_post(board_id, thread_id, body, ipv4_addr)
-  return jsonify(result)
+  return jsonify(result), result['status']
 
 @app.route('/posts/<int:post_id>', methods=['DELETE'])
 def api_delete_post(post_id):
@@ -115,7 +115,7 @@ def api_delete_post(post_id):
   ipv4_addr = request.environ.get('REMOTE_ADDR', request.remote_addr)
   # delete content from db
   result = delete_post(post_id, ipv4_addr)
-  return jsonify(result)
+  return jsonify(result), result['status']
 
 def lambda_handler(evt, ctx):
   """AWS Lambda entrypoint"""
