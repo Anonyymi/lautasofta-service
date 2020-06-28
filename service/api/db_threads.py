@@ -54,49 +54,76 @@ def insert_thread(board_id, thread, ipv4_addr):
     'status': 400,
     'data': None
   }
-  # if requested, generate presigned s3 POST url for the file
-  file_upload_info = {
-    'url': None,
-    'fields': {
-      'key': None
-    },
-  }
-  if thread['extension'] is not None:
-    file_upload_info = S3Client().instance.generate_presigned_post(
-      os.getenv('MEDIA_BUCKET'),
-      str(uuid.uuid4()) + '.' + thread['extension'],
-      Fields={
-        'acl': 'public-read'
-      },
-      Conditions=[
-        ['acl', 'public-read'],
-        ['content-type', thread['extension']],
-        ['content-length-range', 128, 4096000]
-      ],
-      ExpiresIn=60
-    )
-  # insert row to db
-  with DbInstance().get_instance().cursor() as cursor:
-    # insert/update ipv4_addr row
-    rows_anon = cursor.execute("""
-      INSERT INTO anons (ipv4_addr) VALUES (INET_ATON(%s))
-      ON DUPLICATE KEY UPDATE timestamp_posted=CURRENT_TIMESTAMP
+
+  db = DbInstance().get_instance()
+
+  # check if user has permission to create thread
+  permitted = False
+  with db.cursor() as cursor:
+    cursor.execute("""
+      SELECT
+        a.timestamp_created_thread < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 MINUTE) AS permission
+      FROM anons AS a
+      WHERE a.ipv4_addr = INET_ATON(%s)
     """, (ipv4_addr,))
-    # insert thread
-    rows_thread = cursor.execute("""
-      INSERT INTO posts (board_id, data_message, data_filepath, ipv4_addr)
-      VALUES (%s, %s, %s, INET_ATON(%s))
-    """, (board_id, thread['message'], file_upload_info['fields']['key'], ipv4_addr,))
-    id_inserted = cursor.lastrowid
-    # commit if ok
-    if rows_anon >= 1 and rows_thread == 1:
-      cursor.connection.commit()
-      result['data'] = {
-        'id': id_inserted,
-        'url': file_upload_info['url'],
-        'fields': file_upload_info['fields']
-      }
-  # update result
-  if result['data']:
-    result['status'] = 201
+    permitted = cursor.fetchone()
+    permitted = True if permitted is None else permitted['permission'] == 1
+  
+  # create thread if permitted
+  if permitted:
+    # if requested, generate presigned s3 POST url for the file
+    file_upload_info = {
+      'url': None,
+      'fields': {
+        'key': None
+      },
+    }
+
+    if thread['extension'] is not None:
+      file_upload_info = S3Client().instance.generate_presigned_post(
+        os.getenv('MEDIA_BUCKET'),
+        str(uuid.uuid4()) + '.' + thread['extension'],
+        Fields={
+          'acl': 'public-read'
+        },
+        Conditions=[
+          ['acl', 'public-read'],
+          ['content-type', thread['extension']],
+          ['content-length-range', 128, 4096000]
+        ],
+        ExpiresIn=60
+      )
+    
+    # insert row to db
+    with db.cursor() as cursor:
+      # insert/update ipv4_addr row
+      rows_anon = cursor.execute("""
+        INSERT INTO anons (ipv4_addr, timestamp_created_thread) VALUES (INET_ATON(%s), CURRENT_TIMESTAMP)
+        ON DUPLICATE KEY UPDATE timestamp_created_thread=CURRENT_TIMESTAMP
+      """, (ipv4_addr,))
+
+      # insert thread
+      rows_thread = cursor.execute("""
+        INSERT INTO posts (board_id, data_message, data_filepath, ipv4_addr)
+        VALUES (%s, %s, %s, INET_ATON(%s))
+      """, (board_id, thread['message'], file_upload_info['fields']['key'], ipv4_addr,))
+      id_inserted = cursor.lastrowid
+
+      # commit if ok
+      if rows_anon >= 1 and rows_thread == 1:
+        cursor.connection.commit()
+        result['status'] = 201
+        result['data'] = {
+          'id': id_inserted,
+          'url': file_upload_info['url'],
+          'fields': file_upload_info['fields']
+        }
+  else:
+    result['status'] = 429
+    result['data'] = {
+      'message': 'too many requests'
+    }
+  
+  db.close()
+
   return result
