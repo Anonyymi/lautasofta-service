@@ -67,11 +67,12 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
         os.getenv('MEDIA_BUCKET'),
         str(uuid.uuid4()) + '.' + post['extension'],
         Fields={
-          'acl': 'public-read'
+          'acl': 'public-read',
+          'Content-Type': 'image/' + post['extension']
         },
         Conditions=[
-          ['acl', 'public-read'],
-          ['content-type', post['extension']],
+          {'acl': 'public-read'},
+          {'Content-Type': 'image/' + post['extension']},
           ['content-length-range', 128, 4096000]
         ],
         ExpiresIn=60

@@ -24,16 +24,54 @@ Parameters:
     Default: http://localhost:4566
 
 Resources:
+  LogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: LogDeliveryWrite
   MediaBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref MediaBucketName
+      CorsConfiguration:
+        CorsRules:
+          - Id: AllowAnyOrigin
+            MaxAge: '3600'
+            AllowedHeaders: ['*']
+            AllowedMethods: ['GET', 'POST']
+            AllowedOrigins: ['*']
       # NOTE: check database/migrations/V1__init_db.sql::AutoDeleteOldPosts
       LifecycleConfiguration:
         Rules:
           - Id: ExpireObjects
             Status: 'Enabled'
             ExpirationInDays: 30
+      LoggingConfiguration:
+        DestinationBucketName: !Ref LogsBucket
+        LogFilePrefix: 'media-bucket-logs'
+  ApiHandlerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: AllowMediaUpload
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                  - 's3:PutObjectAcl'
+                Resource: !Sub 'arn:aws:s3:::${MediaBucket}/*'
   ApiHandler:
     Type: AWS::Serverless::Function
     Properties:
@@ -55,3 +93,4 @@ Resources:
           Properties:
             Path: /{proxy+}
             Method: ANY
+      Role: !GetAtt ApiHandlerRole.Arn

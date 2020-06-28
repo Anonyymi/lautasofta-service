@@ -84,11 +84,12 @@ def insert_thread(board_id, thread, ipv4_addr):
         os.getenv('MEDIA_BUCKET'),
         str(uuid.uuid4()) + '.' + thread['extension'],
         Fields={
-          'acl': 'public-read'
+          'acl': 'public-read',
+          'Content-Type': 'image/' + thread['extension']
         },
         Conditions=[
-          ['acl', 'public-read'],
-          ['content-type', thread['extension']],
+          {'acl': 'public-read'},
+          {'Content-Type': 'image/' + thread['extension']},
           ['content-length-range', 128, 4096000]
         ],
         ExpiresIn=60
