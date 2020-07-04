@@ -9,5 +9,5 @@ flyway -configFiles=./database/flyway.conf migrate
 # app
 sam build
 aws --endpoint-url http://localhost:4566 cloudformation deploy \
-    --template-file "./.aws-sam//build/template.yaml" \
+    --template-file "./.aws-sam/build/template.yaml" \
     --stack-name "lautasofta-service"

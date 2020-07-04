@@ -62,7 +62,7 @@ def insert_thread(board_id, thread, ipv4_addr):
   with db.cursor() as cursor:
     cursor.execute("""
       SELECT
-        a.timestamp_created_thread < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 MINUTE) AS permission
+        a.timestamp_created_thread < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 SECOND) AS permission
       FROM anons AS a
       WHERE a.ipv4_addr = INET_ATON(%s)
     """, (ipv4_addr,))

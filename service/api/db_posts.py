@@ -45,7 +45,7 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
   with db.cursor() as cursor:
     cursor.execute("""
       SELECT
-        a.timestamp_created_post < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 10 SECOND) AS permission
+        a.timestamp_created_post < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 SECOND) AS permission
       FROM anons AS a
       WHERE a.ipv4_addr = INET_ATON(%s)
     """, (ipv4_addr,))

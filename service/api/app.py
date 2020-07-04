@@ -56,11 +56,11 @@ def api_get_boards():
 def api_get_threads(board_id):
   """Returns a list of threads"""
   # parse args
-  arg_limit = request.args.get('limit', default=128, type=int)
+  arg_limit = request.args.get('limit', default=10, type=int)
   arg_offset = request.args.get('offset', default=0, type=int)
   # validate args
-  if arg_limit <= 0 or arg_limit > 128:
-    arg_limit = 128
+  if arg_limit <= 0 or arg_limit > config['MAX_THREADS_PER_PAGE']:
+    arg_limit = config['MAX_THREADS_PER_PAGE']
   if arg_offset < 0:
     arg_offset = 0
   # get results from db
@@ -84,11 +84,11 @@ def api_post_thread(board_id):
 def api_get_posts(board_id, thread_id):
   """Returns a list of posts"""
   # parse args
-  arg_limit = request.args.get('limit', default=128, type=int)
+  arg_limit = request.args.get('limit', default=100, type=int)
   arg_offset = request.args.get('offset', default=0, type=int)
   # validate args
-  if arg_limit <= 0 or arg_limit > 128:
-    arg_limit = 128
+  if arg_limit <= 0 or arg_limit > config['MAX_POSTS_PER_PAGE']:
+    arg_limit = config['MAX_POSTS_PER_PAGE']
   if arg_offset < 0:
     arg_offset = 0
   # get results from db
