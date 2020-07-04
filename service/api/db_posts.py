@@ -9,6 +9,7 @@ def select_posts(board_id, thread_id, limit, offset):
     'status': 404,
     'data': None
   }
+
   # fetch rows from db
   with DbInstance().get_instance().cursor() as cursor:
     cursor.execute("""
@@ -26,9 +27,11 @@ def select_posts(board_id, thread_id, limit, offset):
       LIMIT %s OFFSET %s
     """, (board_id, thread_id, thread_id, limit, offset,))
     result['data'] = cursor.fetchall()
+  
   # update result
   if result['data']:
     result['status'] = 200
+  
   return result
 
 def insert_post(board_id, thread_id, post, ipv4_addr):
@@ -38,11 +41,9 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
     'data': None
   }
 
-  db = DbInstance().get_instance()
-
   # check if user has permission to create post
   permitted = False
-  with db.cursor() as cursor:
+  with DbInstance().get_instance().cursor() as cursor:
     cursor.execute("""
       SELECT
         a.timestamp_created_post < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 SECOND) AS permission
@@ -51,35 +52,33 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
     """, (ipv4_addr,))
     permitted = cursor.fetchone()
     permitted = True if permitted is None else permitted['permission'] == 1
-  
-  # create post if permitted
-  if permitted:
-    # if requested, generate presigned s3 POST url for the file
-    file_upload_info = {
-      'url': None,
-      'fields': {
-        'key': None
-      },
-    }
 
-    if post['extension'] is not None:
-      file_upload_info = S3Client().instance.generate_presigned_post(
-        os.getenv('MEDIA_BUCKET'),
-        str(uuid.uuid4()) + '.' + post['extension'],
-        Fields={
-          'acl': 'public-read',
-          'Content-Type': 'image/' + post['extension']
+    # create post if permitted
+    if permitted:
+      # if requested, generate presigned s3 POST url for the file
+      file_upload_info = {
+        'url': None,
+        'fields': {
+          'key': None
         },
-        Conditions=[
-          {'acl': 'public-read'},
-          {'Content-Type': 'image/' + post['extension']},
-          ['content-length-range', 128, 4096000]
-        ],
-        ExpiresIn=60
-      )
-    
-    # insert row to db
-    with db.cursor() as cursor:
+      }
+
+      if post['extension'] is not None:
+        file_upload_info = S3Client().instance.generate_presigned_post(
+          os.getenv('MEDIA_BUCKET'),
+          str(uuid.uuid4()) + '.' + post['extension'],
+          Fields={
+            'acl': 'public-read',
+            'Content-Type': 'image/' + post['extension']
+          },
+          Conditions=[
+            {'acl': 'public-read'},
+            {'Content-Type': 'image/' + post['extension']},
+            ['content-length-range', 128, 4096000]
+          ],
+          ExpiresIn=60
+        )
+      
       # insert/update ipv4_addr row
       rows_anon = cursor.execute("""
         INSERT INTO anons (ipv4_addr, timestamp_created_post) VALUES (INET_ATON(%s), CURRENT_TIMESTAMP)
@@ -109,13 +108,11 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
           'url': file_upload_info['url'],
           'fields': file_upload_info['fields']
         }
-  else:
-    result['status'] = 429
-    result['data'] = {
-      'message': 'too many requests'
-    }
-  
-  db.close()
+    else:
+      result['status'] = 429
+      result['data'] = {
+        'message': 'too many requests'
+      }
   
   return result
 
@@ -125,6 +122,7 @@ def delete_post(post_id, ipv4_add):
     'status': 401,
     'data': None
   }
+
   # delete row from db
   with DbInstance().get_instance().cursor() as cursor:
     # delete post
@@ -144,7 +142,9 @@ def delete_post(post_id, ipv4_add):
       result['data'] = {
         'affected': rows_post
       }
+
   # update result
   if result['data']:
     result['status'] = 200
+  
   return result

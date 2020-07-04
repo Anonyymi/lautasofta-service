@@ -64,7 +64,6 @@ Resources:
           MEDIA_BUCKET:     !Ref MediaBucket
           S3_ENDPOINT_URL:  !Ref S3EndpointUrl
       Policies:
-        - AllowMediaUpload
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow

@@ -14,5 +14,4 @@ class DbInstance():
     )
   
   def get_instance(self):
-    self.instance.ping(reconnect=True)
     return self.instance

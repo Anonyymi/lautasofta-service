@@ -6,6 +6,7 @@ def select_boards():
     'status': 404,
     'data': None
   }
+
   # fetch rows from db
   with DbInstance().get_instance().cursor() as cursor:
     cursor.execute("""
@@ -20,7 +21,9 @@ def select_boards():
       ORDER BY b.id ASC
     """)
     result['data'] = cursor.fetchall()
+
   # update result
   if result['data']:
     result['status'] = 200
+  
   return result
