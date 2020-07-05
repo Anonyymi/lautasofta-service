@@ -19,6 +19,7 @@ def select_threads(board_id, limit, offset):
         t.thread_id AS thread_id,
         t.data_message AS data_message,
         t.data_filepath AS data_filepath,
+        t.data_thumbpath AS data_thumbpath,
         DATE_FORMAT(t.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
         DATE_FORMAT(t.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited
       FROM posts AS t
@@ -36,6 +37,7 @@ def select_threads(board_id, limit, offset):
             p.thread_id AS thread_id,
             p.data_message AS data_message,
             p.data_filepath AS data_filepath,
+            p.data_thumbpath AS data_thumbpath,
             DATE_FORMAT(p.datetime_created, '%%m/%%d/%%y(%%a)%%T')  AS datetime_created,
             DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited
           FROM posts AS p
