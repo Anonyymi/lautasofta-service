@@ -77,6 +77,7 @@ Resources:
       Handler: api.app.lambda_handler
       Runtime: python3.7
       Timeout: 3
+      MemorySize: 128
       Environment:
         Variables:
           DB_HOST:          !Ref DbHost
@@ -109,6 +110,7 @@ Resources:
       Handler: thumb.app.lambda_handler
       Runtime: python3.7
       Timeout: 10
+      MemorySize: 256
       Environment:
         Variables:
           DB_HOST:          !Ref DbHost
