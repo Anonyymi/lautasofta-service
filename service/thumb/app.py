@@ -16,7 +16,7 @@ def lambda_handler(evt, ctx):
     for record in evt['Records']:
       # get object key & thumb key
       s3_key = record['s3']['object']['key']
-      s3_thumbkey = 'thumb_' + s3_key
+      s3_thumbkey = 'thumb_' + s3_key.rsplit('.', 1)[0] + '.png'
       # get object data
       s3_filestr = io.BytesIO()
       S3Client().instance.download_fileobj(os.getenv('MEDIA_BUCKET'), s3_key, s3_filestr)
