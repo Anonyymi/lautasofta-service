@@ -117,7 +117,7 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
   
   return result
 
-def delete_post(post_id, ipv4_add):
+def delete_post(post_id, ipv4_addr):
   # prepare result
   result = {
     'status': 401,
@@ -126,23 +126,56 @@ def delete_post(post_id, ipv4_add):
 
   # delete row from db
   with DbInstance().get_instance().cursor() as cursor:
-    # delete post
-    rows_post = cursor.execute("""
-      UPDATE posts
-      SET deleted = true
-      WHERE
-        id = %s
-      AND
-        ipv4_addr = INET_ATON(%s)
-      AND
-        datetime_created > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
-    """, (post_id, ipv4_add,))
-    # commit if ok
-    if rows_post >= 1:
-      cursor.connection.commit()
-      result['data'] = {
-        'affected': rows_post
-      }
+    # delete post (admin)
+    if ipv4_addr in os.getenv('ADMIN_IPS'):
+      # select post media
+      cursor.execute("""
+        SELECT
+          p.data_filepath AS data_filepath,
+          p.data_thumbpath AS data_thumbpath
+        FROM posts AS p
+        WHERE p.id = %s
+      """, (post_id,))
+      media_deleted = cursor.fetchone()
+
+      # delete post
+      rows_deleted = cursor.execute("""
+        DELETE FROM posts
+        WHERE id = %s
+      """, (post_id,))
+
+      # commit if ok
+      if rows_deleted >= 1:
+        cursor.connection.commit()
+        result['data'] = {
+          'affected': rows_deleted
+        }
+
+        # delete media from media bucket
+        try:
+          S3Client().instance.delete_object(Bucket=os.getenv('MEDIA_BUCKET'), Key=media_deleted['data_filepath'])
+          S3Client().instance.delete_object(Bucket=os.getenv('MEDIA_BUCKET'), Key=media_deleted['data_thumbpath'])
+        except Exception as err:
+          print(f'{err}')
+    # delete post (normal)
+    else:
+      rows_deleted = cursor.execute("""
+        UPDATE posts
+        SET deleted = true
+        WHERE
+          id = %s
+        AND
+          ipv4_addr = INET_ATON(%s)
+        AND
+          datetime_created > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
+      """, (post_id, ipv4_addr,))
+      
+      # commit if ok
+      if rows_deleted >= 1:
+        cursor.connection.commit()
+        result['data'] = {
+          'affected': rows_deleted
+        }
 
   # update result
   if result['data']:

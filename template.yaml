@@ -22,6 +22,9 @@ Parameters:
   S3EndpointUrl:
     Type: String
     Default: http://localhost:4566
+  AdminIps:
+    Type: String
+    Default: '127.0.0.1'
   ApiDomainName:
     Type: String
     Default: ''
@@ -56,7 +59,7 @@ Resources:
             ExpirationInDays: 30
       LoggingConfiguration:
         DestinationBucketName: !Ref LogsBucket
-        LogFilePrefix: 'media-bucket-logs'
+        LogFilePrefix: 'access-logs/'
   ApiEndpoint:
     Type: AWS::Serverless::Api
     Properties:
@@ -82,6 +85,7 @@ Resources:
           DB_NAME:          !Ref DbName
           MEDIA_BUCKET:     !Ref MediaBucketName
           S3_ENDPOINT_URL:  !Ref S3EndpointUrl
+          ADMIN_IPS:        !Ref AdminIps
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -89,6 +93,7 @@ Resources:
               Action:
                 - 's3:PutObject'
                 - 's3:PutObjectAcl'
+                - 's3:DeleteObject'
               Resource: !Sub 'arn:aws:s3:::${MediaBucketName}/*'
       Events:
         Api:
@@ -112,6 +117,7 @@ Resources:
           DB_NAME:          !Ref DbName
           MEDIA_BUCKET:     !Ref MediaBucketName
           S3_ENDPOINT_URL:  !Ref S3EndpointUrl
+          ADMIN_IPS:        !Ref AdminIps
       Policies:
         - Version: '2012-10-17'
           Statement:
