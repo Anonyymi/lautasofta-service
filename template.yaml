@@ -22,6 +22,15 @@ Parameters:
   S3EndpointUrl:
     Type: String
     Default: http://localhost:4566
+  ApiDomainName:
+    Type: String
+    Default: ''
+  ApiHostedZoneId:
+    Type: String
+    Default: ''
+  ApiCertificateArn:
+    Type: String
+    Default: ''
 
 Resources:
   LogsBucket:
@@ -48,6 +57,16 @@ Resources:
       LoggingConfiguration:
         DestinationBucketName: !Ref LogsBucket
         LogFilePrefix: 'media-bucket-logs'
+  ApiEndpoint:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Domain:
+        DomainName: !Ref ApiDomainName
+        CertificateArn: !Ref ApiCertificateArn
+        EndpointConfiguration: REGIONAL
+        Route53:
+          HostedZoneId: !Ref ApiHostedZoneId
   ApiHandler:
     Type: AWS::Serverless::Function
     Properties:
@@ -77,3 +96,4 @@ Resources:
           Properties:
             Path: /{proxy+}
             Method: ANY
+            RestApiId: !Ref ApiEndpoint
