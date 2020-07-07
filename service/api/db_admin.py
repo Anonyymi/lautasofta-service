@@ -23,7 +23,7 @@ def select_admin_posts(deleted, limit, offset):
         DATE_FORMAT(p.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
         DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited,
         DATE_FORMAT(p.timestamp_bumped, '%%m/%%d/%%y(%%a)%%T') AS timestamp_bumped,
-        INET_ATON(p.ipv4_addr) AS ipv4_addr,
+        CONCAT(SUBSTRING_INDEX(INET_NTOA(p.ipv4_addr), '.', 2), '.x.x') AS ipv4_addr,
         p.deleted AS deleted
       FROM posts AS p
       WHERE p.deleted = %s
