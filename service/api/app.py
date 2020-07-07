@@ -98,10 +98,10 @@ def api_post_thread(board_id):
   # validate body
   body = request.json
   if not body['message'] or len(body['message'].strip(' \t\n\r')) == 0:
-    return jsonify(status=400, data={'statusCode': 400, 'body': None})
+    return jsonify({'statusCode': 400, 'body': None}), 400
   
   if not body['extension'] or body['extension'] not in config['MEDIA_CONTENT_TYPES']:
-    return jsonify(status=400, data={'statusCode': 400, 'body': None})
+    return jsonify({'statusCode': 400, 'body': None}), 400
   
   # insert content to db
   result = insert_thread(board_id, body, ipv4_addr)
@@ -119,6 +119,7 @@ def api_get_posts(board_id, thread_id):
   # validate args
   if arg_limit <= 0 or arg_limit > config['MAX_POSTS_PER_PAGE']:
     arg_limit = config['MAX_POSTS_PER_PAGE']
+  
   if arg_offset < 0:
     arg_offset = 0
   
@@ -137,7 +138,7 @@ def api_post_post(board_id, thread_id):
   # validate body
   body = request.json
   if not body['message'] or len(body['message'].strip(' \t\n\r')) == 0:
-    return jsonify(status=400, data={'statusCode': 400, 'body': None})
+    return jsonify({'statusCode': 400, 'body': None}), 400
   
   if body['extension'] and body['extension'] not in config['MEDIA_CONTENT_TYPES']:
     body['extension'] = None
@@ -182,6 +183,7 @@ def api_admin_get_posts():
   # validate args
   if arg_limit <= 0 or arg_limit > config['MAX_POSTS_PER_PAGE']:
     arg_limit = config['MAX_POSTS_PER_PAGE']
+  
   if arg_offset < 0:
     arg_offset = 0
 
