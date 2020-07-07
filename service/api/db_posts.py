@@ -120,7 +120,7 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
 def delete_post(post_id, ipv4_addr):
   # prepare result
   result = {
-    'status': 401,
+    'status': 403,
     'data': None
   }
 
