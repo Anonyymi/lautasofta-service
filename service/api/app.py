@@ -29,12 +29,17 @@ from api.db_threads import (
   insert_thread
 )
 from api.db_posts import (
+  select_post,
   select_posts,
   insert_post,
   delete_post
 )
+from api.db_reports import (
+  insert_report
+)
 from api.db_admin import (
-  select_admin_posts
+  select_admin_posts,
+  select_admin_reports
 )
 
 # init flask app
@@ -108,6 +113,15 @@ def api_post_thread(board_id):
 
   return jsonify(result), result['status']
 
+@app.route('/posts/<int:post_id>', methods=['GET'])
+def api_get_post(post_id):
+  """Returns a single post"""
+  
+  # get result from db
+  result = select_post(post_id)
+
+  return jsonify(result), result['status']
+
 @app.route('/boards/<int:board_id>/threads/<int:thread_id>/posts', methods=['GET'])
 def api_get_posts(board_id, thread_id):
   """Returns a list of posts"""
@@ -160,6 +174,23 @@ def api_delete_post(post_id):
 
   return jsonify(result), result['status']
 
+@app.route('/reports', methods=['POST'])
+def api_post_report():
+  """Creates a new report"""
+
+  # parse request env
+  ipv4_addr = request.environ.get('REMOTE_ADDR', request.remote_addr)
+
+  # validate body
+  body = request.json
+  if not body['reason'] or len(body['reason'].strip(' \t\n\r')) == 0:
+    return jsonify({'statusCode': 400, 'body': None}), 400
+  
+  # insert content to db
+  result = insert_report(body, ipv4_addr)
+
+  return jsonify(result), result['status']
+
 #######################
 # ADMIN ROUTES BELOW  #
 #######################
@@ -189,6 +220,33 @@ def api_admin_get_posts():
 
   # get results from db
   result = select_admin_posts(arg_deleted, arg_limit, arg_offset)
+
+  return jsonify(result), result['status']
+
+@app.route('/admin/reports', methods=['GET'])
+def api_admin_get_reports():
+  """Returns a list of reports filtered by various parameters"""
+
+  # parse request env
+  ipv4_addr = request.environ.get('REMOTE_ADDR', request.remote_addr)
+
+  # return 403 forbidden if requester is not an admin
+  if ipv4_addr not in os.getenv('ADMIN_IPS'):
+    return jsonify(status=403, data={'statusCode': 403, 'body': None})
+
+  # parse args
+  arg_limit = request.args.get('limit', default=100, type=int)
+  arg_offset = request.args.get('offset', default=0, type=int)
+
+  # validate args
+  if arg_limit <= 0 or arg_limit > config['MAX_POSTS_PER_PAGE']:
+    arg_limit = config['MAX_POSTS_PER_PAGE']
+  
+  if arg_offset < 0:
+    arg_offset = 0
+
+  # get results from db
+  result = select_admin_reports(arg_limit, arg_offset)
 
   return jsonify(result), result['status']
 

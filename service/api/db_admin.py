@@ -37,3 +37,33 @@ def select_admin_posts(deleted, limit, offset):
     result['status'] = 200
   
   return result
+
+def select_admin_reports(limit, offset):
+  # prepare result
+  result = {
+    'status': 404,
+    'data': None
+  }
+
+  # fetch rows from db
+  with DbInstance().get_instance().cursor() as cursor:
+    cursor.execute("""
+      SELECT
+        r.id AS id,
+        r.post_id AS post_id,
+        r.data_reason AS data_reason,
+        DATE_FORMAT(r.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
+        DATE_FORMAT(r.timestamp_processed, '%%m/%%d/%%y(%%a)%%T') AS timestamp_processed,
+        CONCAT(SUBSTRING_INDEX(INET_NTOA(r.ipv4_addr), '.', 2), '.x.x') AS ipv4_addr,
+        r.processed AS processed
+      FROM reports AS r
+      ORDER BY r.datetime_created DESC
+      LIMIT %s OFFSET %s
+    """, (limit, offset,))
+    result['data'] = cursor.fetchall()
+  
+  # update result
+  if result['data']:
+    result['status'] = 200
+  
+  return result

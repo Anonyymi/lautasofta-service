@@ -4,7 +4,7 @@ import pytest
 import common.set_env
 from api import app
 
-def gen_apigw_event(resource, method, body, query):
+def gen_apigw_event(resource, method, body, query, ipv4_addr='127.0.0.1'):
   """Generates an API Gateway event"""
 
   return {
@@ -27,7 +27,7 @@ def gen_apigw_event(resource, method, body, query):
         "cognitoIdentityPoolId": "",
         "cognitoIdentityId": "",
         "cognitoAuthenticationProvider": "",
-        "sourceIp": "127.0.0.1",
+        "sourceIp": ipv4_addr,
         "accountId": "",
       },
       "stage": "prod",
@@ -39,7 +39,7 @@ def gen_apigw_event(resource, method, body, query):
       "CloudFront-Is-Desktop-Viewer": "true",
       "CloudFront-Is-SmartTV-Viewer": "false",
       "CloudFront-Is-Mobile-Viewer": "false",
-      "X-Forwarded-For": "127.0.0.1, 127.0.0.2",
+      "X-Forwarded-For": ipv4_addr,
       "CloudFront-Viewer-Country": "US",
       "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
       "Upgrade-Insecure-Requests": "1",
@@ -59,6 +59,28 @@ def gen_apigw_event(resource, method, body, query):
     "path": resource,
   }
 
+def test_api_get_config_user():
+  evt = gen_apigw_event('/config', 'GET', None, None, '127.0.0.2')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '200'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['MEDIA_BUCKET_URL'] is not None
+  assert bdy['data']['USER_ROLE'] == 'USER'
+
+def test_api_get_config_administrator():
+  evt = gen_apigw_event('/config', 'GET', None, None, '127.0.0.1')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '200'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['MEDIA_BUCKET_URL'] is not None
+  assert bdy['data']['USER_ROLE'] == 'ADMINISTRATOR'
+
 def test_api_get_boards():
   evt = gen_apigw_event('/boards', 'GET', None, None)
   res = app.lambda_handler(evt, '')
@@ -67,5 +89,4 @@ def test_api_get_boards():
   assert res['statusCode'] == '200'
   assert 'data' in res['body']
   assert bdy['data'] is not None
-  assert bdy['data'][0]['path'] == 'b'
-  assert bdy['data'][1]['path'] == 'a'
+  assert bdy['data'][0] is not None

@@ -21,10 +21,7 @@ Furthermore, the connection between the service and the database should be encry
 * Implement basic administration related operations
   * IP-ban
   * List bans with times and reasons
-  * Report post
-  * View user deleted posts (to mainly monitor posted media)
 * Implement basic post related operations
-  * Fetch single post by id
   * Post refer_to id list
   * Post refer_from id list
   * Edit post (same restriction logic as with delete post)
