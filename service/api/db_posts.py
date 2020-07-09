@@ -158,40 +158,26 @@ def delete_post(post_id, ipv4_addr):
   with DbInstance().get_instance().cursor() as cursor:
     # delete post (admin)
     if ipv4_addr in os.getenv('ADMIN_IPS'):
-      # select post media
-      cursor.execute("""
-        SELECT
-          p.data_filepath AS data_filepath,
-          p.data_thumbpath AS data_thumbpath
-        FROM posts AS p
-        WHERE p.id = %s
-      """, (post_id,))
-      media_deleted = cursor.fetchone()
-
-      # delete post
       rows_deleted = cursor.execute("""
-        DELETE FROM posts
-        WHERE id = %s
-      """, (post_id,))
-
+        UPDATE posts
+        SET deleted = true,
+            delete_reason = 'DELETED_BY_ADMIN'
+        WHERE
+          id = %s
+      """, (post_id, ipv4_addr,))
+      
       # commit if ok
       if rows_deleted >= 1:
         cursor.connection.commit()
         result['data'] = {
           'affected': rows_deleted
         }
-
-        # delete media from media bucket
-        try:
-          S3Client().instance.delete_object(Bucket=os.getenv('MEDIA_BUCKET'), Key=media_deleted['data_filepath'])
-          S3Client().instance.delete_object(Bucket=os.getenv('MEDIA_BUCKET'), Key=media_deleted['data_thumbpath'])
-        except Exception as err:
-          print(f'{err}')
     # delete post (normal)
     else:
       rows_deleted = cursor.execute("""
         UPDATE posts
-        SET deleted = true
+        SET deleted = true,
+            delete_reason = 'DELETED_BY_USER'
         WHERE
           id = %s
         AND
