@@ -159,9 +159,9 @@ def delete_post(post_id, ipv4_addr):
     # delete post (admin)
     if ipv4_addr in os.getenv('ADMIN_IPS'):
       rows_deleted = cursor.execute("""
-        UPDATE posts
-        SET deleted = true,
-            delete_reason = 'DELETED_BY_ADMIN'
+        UPDATE posts SET
+          deleted = true,
+          delete_reason = 'DELETED_BY_ADMIN'
         WHERE
           id = %s
       """, (post_id, ipv4_addr,))
@@ -175,9 +175,9 @@ def delete_post(post_id, ipv4_addr):
     # delete post (normal)
     else:
       rows_deleted = cursor.execute("""
-        UPDATE posts
-        SET deleted = true,
-            delete_reason = 'DELETED_BY_USER'
+        UPDATE posts SET
+          deleted = true,
+          delete_reason = 'DELETED_BY_USER'
         WHERE
           id = %s
         AND

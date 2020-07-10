@@ -39,7 +39,10 @@ from api.db_reports import (
 )
 from api.db_admin import (
   select_admin_posts,
-  select_admin_reports
+  select_admin_reports,
+  select_admin_bans,
+  update_admin_report,
+  insert_admin_ban
 )
 
 # init flask app
@@ -247,6 +250,54 @@ def api_admin_get_reports():
 
   # get results from db
   result = select_admin_reports(arg_limit, arg_offset)
+
+  return jsonify(result), result['status']
+
+@app.route('/admin/reports/<int:report_id>', methods=['PUT'])
+def api_put_report(report_id):
+  """Updates a report"""
+
+  # parse request env
+  ipv4_addr = request.environ.get('REMOTE_ADDR', request.remote_addr)
+
+  # return 403 forbidden if requester is not an admin
+  if ipv4_addr not in os.getenv('ADMIN_IPS'):
+    return jsonify(status=403, data={'statusCode': 403, 'body': None})
+
+  # validate body
+  body = request.json
+  if body['processed'] is None:
+    return jsonify({'statusCode': 400, 'body': None}), 400
+  
+  if not body['admin_notes'] or len(body['admin_notes'].strip(' \t\n\r')) == 0:
+    return jsonify({'statusCode': 400, 'body': None}), 400
+  
+  # insert content to db
+  result = update_admin_report(report_id, body, ipv4_addr)
+
+  return jsonify(result), result['status']
+
+@app.route('/admin/bans', methods=['POST'])
+def api_post_ban():
+  """Creates a new ban"""
+
+  # parse request env
+  ipv4_addr = request.environ.get('REMOTE_ADDR', request.remote_addr)
+
+  # return 403 forbidden if requester is not an admin
+  if ipv4_addr not in os.getenv('ADMIN_IPS'):
+    return jsonify(status=403, data={'statusCode': 403, 'body': None})
+
+  # validate body
+  body = request.json
+  if body['report_id'] is None and body['post_id'] is None:
+    return jsonify({'statusCode': 400, 'body': None}), 400
+  
+  if not body['reason'] or len(body['reason'].strip(' \t\n\r')) == 0:
+    return jsonify({'statusCode': 400, 'body': None}), 400
+  
+  # insert content to db
+  result = insert_admin_ban(body, ipv4_addr)
 
   return jsonify(result), result['status']
 

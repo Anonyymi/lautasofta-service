@@ -59,7 +59,7 @@ CREATE TABLE reports (
   timestamp_processed TIMESTAMP NULL DEFAULT NULL,
   ipv4_addr INT UNSIGNED NOT NULL,
   processed BOOLEAN NOT NULL DEFAULT false,
-  processed_notes VARCHAR(1024) NULL DEFAULT NULL,
+  admin_notes VARCHAR(1024) NULL DEFAULT NULL,
   FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
   FOREIGN KEY (ipv4_addr) REFERENCES anons(ipv4_addr) ON DELETE CASCADE
 );
