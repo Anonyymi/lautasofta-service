@@ -21,7 +21,15 @@ def select_post(post_id):
         p.data_filepath AS data_filepath,
         p.data_thumbpath AS data_thumbpath,
         DATE_FORMAT(p.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
-        DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited
+        DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited,
+        (
+          SELECT
+            b.data_reason
+          FROM bans AS b
+          WHERE
+            b.post_id = p.id
+          LIMIT 1
+        ) AS ban_reason
       FROM posts AS p
       WHERE p.id = %s AND p.deleted = false
     """, (post_id,))
@@ -51,7 +59,15 @@ def select_posts(board_id, thread_id, limit, offset):
         p.data_filepath AS data_filepath,
         p.data_thumbpath AS data_thumbpath,
         DATE_FORMAT(p.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
-        DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited
+        DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited,
+        (
+          SELECT
+            b.data_reason
+          FROM bans AS b
+          WHERE
+            b.post_id = p.id
+          LIMIT 1
+        ) AS ban_reason
       FROM posts AS p
       WHERE (p.board_id = %s AND p.thread_id = %s OR p.id = %s) AND p.deleted = false
       ORDER BY p.datetime_created ASC

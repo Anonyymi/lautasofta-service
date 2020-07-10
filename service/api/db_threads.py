@@ -21,7 +21,15 @@ def select_threads(board_id, limit, offset):
         t.data_filepath AS data_filepath,
         t.data_thumbpath AS data_thumbpath,
         DATE_FORMAT(t.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
-        DATE_FORMAT(t.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited
+        DATE_FORMAT(t.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited,
+        (
+          SELECT
+            b.data_reason
+          FROM bans AS b
+          WHERE
+            b.post_id = t.id
+          LIMIT 1
+        ) AS ban_reason
       FROM posts AS t
       WHERE (t.board_id = %s AND t.thread_id IS NULL) AND t.deleted = false
       ORDER BY t.timestamp_bumped DESC
@@ -39,7 +47,15 @@ def select_threads(board_id, limit, offset):
             p.data_filepath AS data_filepath,
             p.data_thumbpath AS data_thumbpath,
             DATE_FORMAT(p.datetime_created, '%%m/%%d/%%y(%%a)%%T')  AS datetime_created,
-            DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited
+            DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited,
+            (
+              SELECT
+                b.data_reason
+              FROM bans AS b
+              WHERE
+                b.post_id = p.id
+              LIMIT 1
+            ) AS ban_reason
           FROM posts AS p
           WHERE (p.board_id = %s AND p.thread_id = %s) AND p.deleted = false
           ORDER BY p.datetime_created DESC

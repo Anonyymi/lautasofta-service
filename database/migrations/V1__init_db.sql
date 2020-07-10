@@ -77,3 +77,13 @@ CREATE TABLE bans (
   FOREIGN KEY (ipv4_addr) REFERENCES anons(ipv4_addr),
   FOREIGN KEY (banned_ipv4_addr) REFERENCES anons(ipv4_addr)
 );
+
+-- NOTE: requires event_scheduler=ON configuration
+CREATE EVENT AutoDeleteExpiredBans
+ON SCHEDULE EVERY 1 HOUR STARTS CURRENT_TIMESTAMP
+DO
+  DELETE LOW_PRIORITY
+  FROM bans
+  WHERE
+    datetime_ends <= DATE_SUB(CURRENT_TIMESTAMP)
+;

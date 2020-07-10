@@ -69,38 +69,6 @@ def select_admin_reports(limit, offset):
   
   return result
 
-def select_admin_bans(limit, offset):
-  # prepare result
-  result = {
-    'status': 404,
-    'data': None
-  }
-
-  # fetch rows from db
-  with DbInstance().get_instance().cursor() as cursor:
-    cursor.execute("""
-      SELECT
-        b.id AS id,
-        b.report_id AS post_id,
-        b.post_id AS post_id,
-        b.data_reason AS data_reason,
-        DATE_FORMAT(b.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
-        DATE_FORMAT(b.datetime_starts, '%%m/%%d/%%y(%%a)%%T') AS datetime_starts,
-        DATE_FORMAT(b.datetime_ends, '%%m/%%d/%%y(%%a)%%T') AS datetime_ends,
-        CONCAT(SUBSTRING_INDEX(INET_NTOA(b.ipv4_addr), '.', 2), '.x.x') AS ipv4_addr,
-        CONCAT(SUBSTRING_INDEX(INET_NTOA(b.banned_ipv4_addr), '.', 2), '.x.x') AS banned_ipv4_addr
-      FROM bans AS b
-      ORDER BY b.datetime_created DESC
-      LIMIT %s OFFSET %s
-    """, (limit, offset,))
-    result['data'] = cursor.fetchall()
-  
-  # update result
-  if result['data']:
-    result['status'] = 200
-  
-  return result
-
 def update_admin_report(report_id, report, ipv4_addr):
   # prepare result
   result = {
@@ -125,6 +93,38 @@ def update_admin_report(report_id, report, ipv4_addr):
         'affected': rows_updated
       }
 
+  return result
+
+def select_admin_bans(limit, offset):
+  # prepare result
+  result = {
+    'status': 404,
+    'data': None
+  }
+
+  # fetch rows from db
+  with DbInstance().get_instance().cursor() as cursor:
+    cursor.execute("""
+      SELECT
+        b.id AS id,
+        b.report_id AS report_id,
+        b.post_id AS post_id,
+        b.data_reason AS data_reason,
+        DATE_FORMAT(b.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
+        DATE_FORMAT(b.datetime_starts, '%%m/%%d/%%y(%%a)%%T') AS datetime_starts,
+        DATE_FORMAT(b.datetime_ends, '%%m/%%d/%%y(%%a)%%T') AS datetime_ends,
+        CONCAT(SUBSTRING_INDEX(INET_NTOA(b.ipv4_addr), '.', 2), '.x.x') AS ipv4_addr,
+        CONCAT(SUBSTRING_INDEX(INET_NTOA(b.banned_ipv4_addr), '.', 2), '.x.x') AS banned_ipv4_addr
+      FROM bans AS b
+      ORDER BY b.datetime_created DESC
+      LIMIT %s OFFSET %s
+    """, (limit, offset,))
+    result['data'] = cursor.fetchall()
+  
+  # update result
+  if result['data']:
+    result['status'] = 200
+  
   return result
 
 def insert_admin_ban(ban, ipv4_addr):
