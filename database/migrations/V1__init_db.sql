@@ -85,5 +85,5 @@ DO
   DELETE LOW_PRIORITY
   FROM bans
   WHERE
-    datetime_ends <= DATE_SUB(CURRENT_TIMESTAMP)
+    datetime_ends <= CURRENT_TIMESTAMP
 ;
