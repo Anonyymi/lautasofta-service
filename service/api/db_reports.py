@@ -1,7 +1,6 @@
 import os
 import uuid
 from common.dbinstance import DbInstance
-from common.s3client import S3Client
 
 def insert_report(report, ipv4_addr):
   # prepare result
