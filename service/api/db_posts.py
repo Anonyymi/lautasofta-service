@@ -28,6 +28,7 @@ def select_post(post_id):
           FROM bans AS b
           WHERE
             b.post_id = p.id
+          ORDER BY b.datetime_ends IS NULL DESC, b.datetime_ends DESC
           LIMIT 1
         ) AS ban_reason
       FROM posts AS p
@@ -66,6 +67,7 @@ def select_posts(board_id, thread_id, limit, offset):
           FROM bans AS b
           WHERE
             b.post_id = p.id
+          ORDER BY b.datetime_ends IS NULL DESC, b.datetime_ends DESC
           LIMIT 1
         ) AS ban_reason
       FROM posts AS p
@@ -91,17 +93,37 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
   # check if user has permission to create post
   permitted = False
   with DbInstance().get_instance().cursor() as cursor:
+    # check 403 (banned)
+    cursor.execute("""
+      SELECT
+        CASE
+          WHEN b.datetime_ends IS NOT NULL THEN (
+            b.datetime_ends < CURRENT_TIMESTAMP
+          )
+          ELSE (
+            false
+          )
+        END AS permission
+      FROM bans AS b
+      WHERE b.banned_ipv4_addr = INET_ATON(%s)
+      ORDER BY b.datetime_ends IS NULL DESC, b.datetime_ends DESC
+      LIMIT 1
+    """, (ipv4_addr,))
+    permitted_403 = cursor.fetchone()
+    permitted_403 = True if permitted_403 is None else permitted_403['permission'] == 1
+
+    # check 429 (too many requests)
     cursor.execute("""
       SELECT
         a.timestamp_created_post < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 5 SECOND) AS permission
       FROM anons AS a
       WHERE a.ipv4_addr = INET_ATON(%s)
     """, (ipv4_addr,))
-    permitted = cursor.fetchone()
-    permitted = True if permitted is None else permitted['permission'] == 1
+    permitted_429 = cursor.fetchone()
+    permitted_429 = True if permitted_429 is None else permitted_429['permission'] == 1
 
     # create post if permitted
-    if permitted:
+    if permitted_403 and permitted_429:
       # if requested, generate presigned s3 POST url for the file
       file_upload_info = {
         'url': None,
@@ -156,10 +178,16 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
           'fields': file_upload_info['fields']
         }
     else:
-      result['status'] = 429
-      result['data'] = {
-        'message': 'too many requests'
-      }
+      if not permitted_403:
+        result['status'] = 403
+        result['data'] = {
+          'message': 'you are banned'
+        }
+      else:
+        result['status'] = 429
+        result['data'] = {
+          'message': 'too many requests'
+        }
   
   return result
 
