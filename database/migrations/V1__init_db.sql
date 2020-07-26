@@ -11,7 +11,7 @@ INSERT INTO boards (path, name, description, flag_hidden, flag_nsfw)
 VALUES
   ('b', 'random', 'random stuff', false, true),
   ('a', 'anime', 'weeb stuff', false, false),
-  ('v', 'vidya', 'video games', false, false)
+  ('int', 'international', 'chitchat around the globe', false, false)
 ;
 
 CREATE TABLE anons (
