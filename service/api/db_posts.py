@@ -180,7 +180,7 @@ def delete_post(post_id, ipv4_addr):
           delete_reason = 'DELETED_BY_ADMIN'
         WHERE
           id = %s
-      """, (post_id, ipv4_addr,))
+      """, (post_id,))
       
       # commit if ok
       if rows_deleted >= 1:

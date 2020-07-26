@@ -53,7 +53,7 @@ def test_api_post_thread_png():
   assert bdy['data'] is not None
   assert bdy['data']['id'] is not None
 
-  time.sleep(0.2)
+  time.sleep(1.0)
 
 def test_api_post_post_webp():
   evt = gen_apigw_event('boards/1/threads/1/posts', 'POST', {
@@ -68,4 +68,10 @@ def test_api_post_post_webp():
   assert bdy['data'] is not None
   assert bdy['data']['id'] is not None
 
-  time.sleep(0.2)
+  time.sleep(1.0)
+
+def test_api_delete_post():
+  evt = gen_apigw_event('posts/2', 'DELETE')
+  res = app.lambda_handler(evt, '')
+
+  assert res['statusCode'] == '200'
