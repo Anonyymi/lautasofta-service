@@ -9,6 +9,9 @@ from common.config import (
   config,
   get_client_config
 )
+from api.middleware.validate_schema import (
+  validate_schema
+)
 from api.db_boards import (
   select_boards
 )
@@ -68,6 +71,17 @@ def api_get_threads(board_id):
   return jsonify(result), result['status']
 
 @api_main.route('/boards/<int:board_id>/threads', methods=['POST'])
+@validate_schema(schema={
+  'message': {
+    'type': 'string',
+    'minlen': 1,
+    'maxlen': 4096
+  },
+  'extension': {
+    'type': 'string',
+    'values': config['MEDIA_CONTENT_TYPES']
+  }
+})
 def api_post_thread(board_id):
   """Creates a new thread"""
 
