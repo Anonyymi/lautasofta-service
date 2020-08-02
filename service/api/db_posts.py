@@ -91,7 +91,6 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
   }
 
   # check if user has permission to create post
-  permitted = False
   with DbInstance().get_instance().cursor() as cursor:
     # check 403 (banned)
     cursor.execute("""
@@ -132,7 +131,7 @@ def insert_post(board_id, thread_id, post, ipv4_addr):
         },
       }
 
-      if post['extension'] is not None:
+      if 'extension' in post and post['extension'] is not None:
         file_upload_info = S3Client().instance.generate_presigned_post(
           os.getenv('MEDIA_BUCKET'),
           str(uuid.uuid4()) + '.' + post['extension'],

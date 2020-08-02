@@ -44,7 +44,7 @@ def test_api_post_thread_png():
   evt = gen_apigw_event('boards/1/threads', 'POST', {
     'message': 'test msg',
     'extension': 'png'
-  })
+  }, None, '127.0.0.1')
   res = app.lambda_handler(evt, '')
   bdy = json.loads(res['body'])
 
@@ -59,7 +59,36 @@ def test_api_post_post_webp():
   evt = gen_apigw_event('boards/1/threads/1/posts', 'POST', {
     'message': 'test msg',
     'extension': 'webp'
-  })
+  }, None, '127.0.0.2')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '201' 
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['id'] is not None
+
+  time.sleep(1.0)
+
+def test_api_post_post_noimg():
+  evt = gen_apigw_event('boards/1/threads/1/posts', 'POST', {
+    'message': 'test msg'
+  }, None, '127.0.0.3')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '201'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['id'] is not None
+
+  time.sleep(1.0)
+
+def test_api_post_report():
+  evt = gen_apigw_event('reports', 'POST', {
+    'post_id': 2,
+    'reason': 'test report'
+  }, None, '127.0.0.2')
   res = app.lambda_handler(evt, '')
   bdy = json.loads(res['body'])
 
@@ -71,7 +100,7 @@ def test_api_post_post_webp():
   time.sleep(1.0)
 
 def test_api_delete_post():
-  evt = gen_apigw_event('posts/2', 'DELETE')
+  evt = gen_apigw_event('posts/2', 'DELETE', None, None, '127.0.0.2')
   res = app.lambda_handler(evt, '')
 
   assert res['statusCode'] == '200'

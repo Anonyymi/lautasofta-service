@@ -14,8 +14,6 @@ def validate_schema(schema=None):
       # get api schema and request body
       api_schema = schema
       body_req = request.json
-      
-      print(f'api_schema: {api_schema}, body_req: {body_req}')
 
       # nothing to validate: pass
       if api_schema is None:
@@ -24,14 +22,19 @@ def validate_schema(schema=None):
       if body_req is None:
         return validate_schema_response(400, 'invalid body: None')
       
+      if len(body_req) > 128:
+        return validate_schema_response(400, 'invalid body: len(keys) > 128')
+      
       # validate request body against api schema
-      for key, val in body_req.items():
-        if key in api_schema:
-          result = validate_schema_obj(key, val, api_schema)
+      for key, val in api_schema.items():
+        if key in body_req:
+          result = validate_schema_obj(key, body_req[key], api_schema)
           
           # schema is invalid: fail
           if result is not None:
             return validate_schema_response(400, f'invalid body: {result}')
+        elif not val['nullable']:
+          return validate_schema_response(400, f'invalid body: key \'{key}\' missing from body')
 
       # schema is valid: pass
       return ctx
@@ -68,8 +71,11 @@ def validate_schema_obj(key, val, api_schema, n=0):
       return f'key \'{key}\' value type is not \'{sch_type}\''
     elif not val:
       return f'key \'{key}\' value must not be empty'
-    for key_n, val_n in val.items():
-      return validate_schema_obj(key_n, val_n, schema[key_n], n+1)
+    for key_n, val_n in schema.items():
+      if key_n in val[key_n]:
+        return validate_schema_obj(key_n, val[key_n], schema[key_n], n+1)
+      elif not val_n['nullable']:
+        return f'key \'{key_n}\' missing from body'
   
   return None
 

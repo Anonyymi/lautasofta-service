@@ -12,6 +12,11 @@ from common.config import (
 from api.middleware.validate_schema import (
   validate_schema
 )
+from api.api_schemas import (
+  api_schema_thread,
+  api_schema_post,
+  api_schema_report
+)
 from api.db_boards import (
   select_boards
 )
@@ -71,33 +76,15 @@ def api_get_threads(board_id):
   return jsonify(result), result['status']
 
 @api_main.route('/boards/<int:board_id>/threads', methods=['POST'])
-@validate_schema(schema={
-  'message': {
-    'type': 'string',
-    'minlen': 1,
-    'maxlen': 4096
-  },
-  'extension': {
-    'type': 'string',
-    'values': config['MEDIA_CONTENT_TYPES']
-  }
-})
+@validate_schema(schema=api_schema_thread)
 def api_post_thread(board_id):
   """Creates a new thread"""
 
   # parse request env
   ipv4_addr = request.environ.get('REMOTE_ADDR', request.remote_addr)
-
-  # validate body
-  body = request.json
-  if not body['message'] or len(body['message'].strip(' \t\n\r')) == 0:
-    return jsonify({'statusCode': 400, 'body': None}), 400
-  
-  if not body['extension'] or body['extension'] not in config['MEDIA_CONTENT_TYPES']:
-    return jsonify({'statusCode': 400, 'body': None}), 400
   
   # insert content to db
-  result = insert_thread(board_id, body, ipv4_addr)
+  result = insert_thread(board_id, request.json, ipv4_addr)
 
   return jsonify(result), result['status']
 
@@ -131,22 +118,15 @@ def api_get_posts(board_id, thread_id):
   return jsonify(result), result['status']
 
 @api_main.route('/boards/<int:board_id>/threads/<int:thread_id>/posts', methods=['POST'])
+@validate_schema(schema=api_schema_post)
 def api_post_post(board_id, thread_id):
   """Creates a new post"""
 
   # parse request env
   ipv4_addr = request.environ.get('REMOTE_ADDR', request.remote_addr)
-
-  # validate body
-  body = request.json
-  if not body['message'] or len(body['message'].strip(' \t\n\r')) == 0:
-    return jsonify({'statusCode': 400, 'body': None}), 400
-  
-  if body['extension'] and body['extension'] not in config['MEDIA_CONTENT_TYPES']:
-    body['extension'] = None
   
   # insert content to db
-  result = insert_post(board_id, thread_id, body, ipv4_addr)
+  result = insert_post(board_id, thread_id, request.json, ipv4_addr)
 
   return jsonify(result), result['status']
 
@@ -163,18 +143,14 @@ def api_delete_post(post_id):
   return jsonify(result), result['status']
 
 @api_main.route('/reports', methods=['POST'])
+@validate_schema(schema=api_schema_report)
 def api_post_report():
   """Creates a new report"""
 
   # parse request env
   ipv4_addr = request.environ.get('REMOTE_ADDR', request.remote_addr)
-
-  # validate body
-  body = request.json
-  if not body['reason'] or len(body['reason'].strip(' \t\n\r')) == 0:
-    return jsonify({'statusCode': 400, 'body': None}), 400
   
   # insert content to db
-  result = insert_report(body, ipv4_addr)
+  result = insert_report(request.json, ipv4_addr)
 
   return jsonify(result), result['status']

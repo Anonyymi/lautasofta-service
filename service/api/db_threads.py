@@ -119,7 +119,7 @@ def insert_thread(board_id, thread, ipv4_addr):
         },
       }
 
-      if thread['extension'] is not None:
+      if 'extension' in thread and thread['extension'] is not None:
         file_upload_info = S3Client().instance.generate_presigned_post(
           os.getenv('MEDIA_BUCKET'),
           str(uuid.uuid4()) + '.' + thread['extension'],
