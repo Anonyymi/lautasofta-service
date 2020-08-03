@@ -5,11 +5,13 @@ from common.config import (
 api_schema_thread = {
   'message': {
     'type': 'string',
+    'nullable': False,
     'minlen': 1,
     'maxlen': 4096
   },
   'extension': {
     'type': 'string',
+    'nullable': False,
     'values': config['MEDIA_CONTENT_TYPES']
   }
 }
@@ -17,24 +19,26 @@ api_schema_thread = {
 api_schema_post = {
   'message': {
     'type': 'string',
+    'nullable': False,
     'minlen': 1,
     'maxlen': 4096
   },
   'extension': {
     'type': 'string',
-    'values': config['MEDIA_CONTENT_TYPES'],
-    'nullable': True
+    'nullable': True,
+    'values': config['MEDIA_CONTENT_TYPES']
   }
 }
 
 api_schema_report = {
   'post_id': {
     'type': 'number',
-    'min': 1,
-    'nullable': False
+    'nullable': False,
+    'min': 1
   },
   'reason': {
     'type': 'string',
+    'nullable': False,
     'minlen': 1,
     'maxlen': 1024
   }

@@ -9,8 +9,8 @@ from common.config import (
   config,
   get_client_config
 )
-from api.middleware.validate_schema import (
-  validate_schema
+from api.middleware.validate_request_body import (
+  validate_request_body
 )
 from api.api_schemas import (
   api_schema_thread,
@@ -76,7 +76,7 @@ def api_get_threads(board_id):
   return jsonify(result), result['status']
 
 @api_main.route('/boards/<int:board_id>/threads', methods=['POST'])
-@validate_schema(schema=api_schema_thread)
+@validate_request_body(schema=api_schema_thread)
 def api_post_thread(board_id):
   """Creates a new thread"""
 
@@ -118,7 +118,7 @@ def api_get_posts(board_id, thread_id):
   return jsonify(result), result['status']
 
 @api_main.route('/boards/<int:board_id>/threads/<int:thread_id>/posts', methods=['POST'])
-@validate_schema(schema=api_schema_post)
+@validate_request_body(schema=api_schema_post)
 def api_post_post(board_id, thread_id):
   """Creates a new post"""
 
@@ -143,7 +143,7 @@ def api_delete_post(post_id):
   return jsonify(result), result['status']
 
 @api_main.route('/reports', methods=['POST'])
-@validate_schema(schema=api_schema_report)
+@validate_request_body(schema=api_schema_report)
 def api_post_report():
   """Creates a new report"""
 

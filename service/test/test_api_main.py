@@ -104,3 +104,130 @@ def test_api_delete_post():
   res = app.lambda_handler(evt, '')
 
   assert res['statusCode'] == '200'
+
+def test_api_post_thread_err_empty_body():
+  evt = gen_apigw_event('boards/1/threads', 'POST', {}, None, '127.0.0.10')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '400'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['message'] is not None
+
+def test_api_post_thread_err_invalid_body_1():
+  evt = gen_apigw_event('boards/1/threads', 'POST', {
+    'message': '',
+  }, None, '127.0.0.10')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '400'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['message'] is not None
+
+def test_api_post_thread_err_invalid_body_2():
+  evt = gen_apigw_event('boards/1/threads', 'POST', {
+    'extension': ''
+  }, None, '127.0.0.10')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '400'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['message'] is not None
+
+def test_api_post_thread_err_invalid_body_3():
+  evt = gen_apigw_event('boards/1/threads', 'POST', {
+    'extension': 'not_a_valid_extension'
+  }, None, '127.0.0.10')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '400'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['message'] is not None
+
+def test_api_post_post_err_empty_body():
+  evt = gen_apigw_event('boards/1/threads/1/posts', 'POST', {}, None, '127.0.0.10')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '400'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['message'] is not None
+
+def test_api_post_post_err_invalid_body_1():
+  evt = gen_apigw_event('boards/1/threads/1/posts', 'POST', {
+    'message': ''
+  }, None, '127.0.0.10')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '400'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['message'] is not None
+
+def test_api_post_post_err_invalid_body_2():
+  evt = gen_apigw_event('boards/1/threads/1/posts', 'POST', {
+    'extension': 'not_a_valid_extension'
+  }, None, '127.0.0.10')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '400'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['message'] is not None
+
+def test_api_post_report_err_empty_body():
+  evt = gen_apigw_event('reports', 'POST', {}, None, '127.0.0.10')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '400'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['message'] is not None
+
+def test_api_post_report_err_invalid_body_1():
+  evt = gen_apigw_event('reports', 'POST', {
+    'post_id': 0,
+    'reason': 'valid test reason'
+  }, None, '127.0.0.10')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '400'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['message'] is not None
+
+def test_api_post_report_err_invalid_body_2():
+  evt = gen_apigw_event('reports', 'POST', {
+    'post_id': 12491258
+  }, None, '127.0.0.10')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '400'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['message'] is not None
+
+def test_api_post_report_err_invalid_body_3():
+  evt = gen_apigw_event('reports', 'POST', {
+    'reason': 'valid_test_reason'
+  }, None, '127.0.0.10')
+  res = app.lambda_handler(evt, '')
+  bdy = json.loads(res['body'])
+
+  assert res['statusCode'] == '400'
+  assert 'data' in res['body']
+  assert bdy['data'] is not None
+  assert bdy['data']['message'] is not None
