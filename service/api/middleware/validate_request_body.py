@@ -45,7 +45,7 @@ def do_request_body_validation(schema: dict, body: dict, n=0):
     sch_type = sch['type']
     sch_nullable = sch['nullable']
 
-    if key in body:
+    if body.get(key) is not None:
       # get body object props
       obj = body[key]
       obj_type = type(obj).__name__
