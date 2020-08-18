@@ -1,6 +1,6 @@
 import json
 
-def gen_apigw_event(resource, method, body=None, query=None, ipv4_addr='127.0.0.1'):
+def gen_apigw_event(resource, method, body=None, query={}, ipv4_addr='127.0.0.1'):
   """Generates an API Gateway event"""
 
   return {
@@ -31,6 +31,7 @@ def gen_apigw_event(resource, method, body=None, query=None, ipv4_addr='127.0.0.
       "path": "/{proxy+}"
     },
     "queryStringParameters": query,
+    "multiValueQueryStringParameters": {x: [x] for x in query},
     "headers": {
       "Content-Type": "application/json",
       "Via": "1.1 08f323deadbeefa7af34d5feb414ce27.cloudfront.net (CloudFront)",

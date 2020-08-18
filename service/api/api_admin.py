@@ -9,6 +9,13 @@ from common.config import (
   config,
   get_client_config
 )
+from api.middleware.validate_request_body import (
+  validate_request_body
+)
+from api.api_schemas import (
+  api_schema_admin_report,
+  api_schema_admin_ban
+)
 from api.db_admin import (
   select_admin_posts,
   select_admin_reports,
@@ -29,7 +36,7 @@ def api_admin_get_posts():
 
   # return 403 forbidden if requester is not an admin
   if ipv4_addr not in os.getenv('ADMIN_IPS'):
-    return jsonify(status=403, data={'statusCode': 403, 'body': None})
+    return jsonify({'status': 403, 'data': None}), 403
 
   # parse args
   arg_limit = request.args.get('limit', default=100, type=int)
@@ -57,7 +64,7 @@ def api_admin_get_reports():
 
   # return 403 forbidden if requester is not an admin
   if ipv4_addr not in os.getenv('ADMIN_IPS'):
-    return jsonify(status=403, data={'statusCode': 403, 'body': None})
+    return jsonify({'status': 403, 'data': None}), 403
 
   # parse args
   arg_limit = request.args.get('limit', default=100, type=int)
@@ -76,6 +83,7 @@ def api_admin_get_reports():
   return jsonify(result), result['status']
 
 @api_admin.route('/reports/<int:report_id>', methods=['PUT'])
+@validate_request_body(schema=api_schema_admin_report)
 def api_put_report(report_id):
   """Updates a report"""
 
@@ -84,18 +92,10 @@ def api_put_report(report_id):
 
   # return 403 forbidden if requester is not an admin
   if ipv4_addr not in os.getenv('ADMIN_IPS'):
-    return jsonify(status=403, data={'statusCode': 403, 'body': None})
-
-  # validate body
-  body = request.json
-  if body['processed'] is None:
-    return jsonify({'statusCode': 400, 'body': None}), 400
-  
-  if not body['admin_notes'] or len(body['admin_notes'].strip(' \t\n\r')) == 0:
-    return jsonify({'statusCode': 400, 'body': None}), 400
+    return jsonify({'status': 403, 'data': None}), 403
   
   # insert content to db
-  result = update_admin_report(report_id, body, ipv4_addr)
+  result = update_admin_report(report_id, request.json, ipv4_addr)
 
   return jsonify(result), result['status']
 
@@ -108,7 +108,7 @@ def api_admin_get_bans():
 
   # return 403 forbidden if requester is not an admin
   if ipv4_addr not in os.getenv('ADMIN_IPS'):
-    return jsonify(status=403, data={'statusCode': 403, 'body': None})
+    return jsonify({'status': 403, 'data': None}), 403
 
   # parse args
   arg_limit = request.args.get('limit', default=100, type=int)
@@ -127,6 +127,7 @@ def api_admin_get_bans():
   return jsonify(result), result['status']
 
 @api_admin.route('/bans', methods=['POST'])
+@validate_request_body(schema=api_schema_admin_ban)
 def api_post_ban():
   """Creates a new ban"""
 
@@ -135,17 +136,9 @@ def api_post_ban():
 
   # return 403 forbidden if requester is not an admin
   if ipv4_addr not in os.getenv('ADMIN_IPS'):
-    return jsonify(status=403, data={'statusCode': 403, 'body': None})
-
-  # validate body
-  body = request.json
-  if body['report_id'] is None and body['post_id'] is None:
-    return jsonify({'statusCode': 400, 'body': None}), 400
-  
-  if not body['reason'] or len(body['reason'].strip(' \t\n\r')) == 0:
-    return jsonify({'statusCode': 400, 'body': None}), 400
+    return jsonify({'status': 403, 'data': None}), 403
   
   # insert content to db
-  result = insert_admin_ban(body, ipv4_addr)
+  result = insert_admin_ban(request.json, ipv4_addr)
 
   return jsonify(result), result['status']

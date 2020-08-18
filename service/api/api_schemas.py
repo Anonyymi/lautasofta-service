@@ -43,3 +43,41 @@ api_schema_report = {
     'maxlen': 1024
   }
 }
+
+api_schema_admin_report = {
+  'processed': {
+    'type': 'number',
+    'nullable': False,
+    'min': 0,
+    'max': 1
+  },
+  'admin_notes': {
+    'type': 'string',
+    'nullable': False,
+    'minlen': 1,
+    'maxlen': 1024
+  }
+}
+
+api_schema_admin_ban = {
+  'report_id': {
+    'type': 'number',
+    'nullable': True,
+    'min': 1
+  },
+  'post_id': {
+    'type': 'number',
+    'nullable': True,
+    'min': 1
+  },
+  'reason': {
+    'type': 'string',
+    'nullable': False,
+    'minlen': 1,
+    'maxlen': 1024
+  },
+  'datetime_ends': {
+    'type': 'string',
+    'nullable': True
+  }
+}

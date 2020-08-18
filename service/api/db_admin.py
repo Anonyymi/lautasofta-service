@@ -136,7 +136,7 @@ def insert_admin_ban(ban, ipv4_addr):
   # insert row to db
   with DbInstance().get_instance().cursor() as cursor:
     rows_inserted = 0
-    if ban['report_id'] is not None:
+    if 'report_id' in ban and ban['report_id'] is not None:
       rows_inserted = cursor.execute("""
         INSERT INTO bans (report_id, data_reason, datetime_ends, ipv4_addr, banned_ipv4_addr)
         VALUES (%s, %s, %s, INET_ATON(%s), (
