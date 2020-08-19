@@ -159,12 +159,13 @@ def insert_admin_ban(ban, ipv4_addr):
             p.id = %s
         ))
       """, (ban['post_id'], ban['reason'], ban['datetime_ends'], ipv4_addr, ban['post_id'],))
+    id_inserted = cursor.lastrowid
 
     if rows_inserted == 1:
       cursor.connection.commit()
-      result['status'] = 200
+      result['status'] = 201
       result['data'] = {
-        'affected': rows_inserted
+        'id': id_inserted
       }
 
   return result
