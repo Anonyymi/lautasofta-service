@@ -73,7 +73,7 @@ Resources:
   ApiHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: service/
+      CodeUri: ../../services/web/
       Handler: api.app.lambda_handler
       Runtime: python3.7
       Timeout: 3
@@ -106,7 +106,7 @@ Resources:
   ThumbnailHandler:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: service/
+      CodeUri: ../../services/web/
       Handler: thumb.app.lambda_handler
       Runtime: python3.7
       Timeout: 10

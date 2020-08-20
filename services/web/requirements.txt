@@ -1,5 +1,7 @@
 aws-wsgi
+boto3
 flask
 flask-cors
 pymysql
 pillow
+gunicorn

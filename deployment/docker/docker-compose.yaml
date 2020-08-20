@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+  db:
+    build:
+      context: '../../services/db'
+      dockerfile: 'Dockerfile'
+    volumes:
+      - db-volume:/var/lib/mysql
+    expose:
+      - 3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+    command: --event-scheduler=on
+    networks:
+      - app
+  flyway:
+    build:
+      context: '../../services/flyway'
+      dockerfile: 'Dockerfile'
+    command: -url=jdbc:mysql://db -schemas=lautasofta -user=root -password=root -connectRetries=60 migrate
+    depends_on:
+      - db
+    networks:
+      - app
+  web:
+    build:
+      context: '../../services/web'
+      dockerfile: 'Dockerfile'
+    expose:
+      - 5000
+    environment:
+      FLASK_ENV: 'production'
+      DB_HOST: 'db'
+      DB_USER: 'root'
+      DB_PASSWD: 'root'
+      DB_NAME: 'lautasofta'
+      MEDIA_BUCKET: 'lautasofta-media'
+      S3_ENDPOINT_URL: 'http://localhost:4566'
+      ADMIN_IPS: '127.0.0.1'
+    depends_on:
+      - db
+    networks:
+      - app
+  nginx:
+    build:
+      context: '../../services/nginx'
+      dockerfile: 'Dockerfile'
+    restart: always
+    ports:
+      - '80:80'
+    depends_on:
+      - web
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge
+
+volumes:
+  db-volume:
+    driver: local
