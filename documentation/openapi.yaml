@@ -1,0 +1,52 @@
+openapi: 3.0.3
+info:
+  title: lautasofta-service
+  version: '1.0'
+  description: Lautasofta Service RESTful API specification.
+  license:
+    name: MIT
+    url: 'https://github.com/Anonyymi/lautasofta-service/blob/master/LICENSE'
+servers:
+  - url: 'http://api.example.com/v1'
+    description: 'Optional server description, e.g. Main (production) server'
+paths:
+  /config:
+    get:
+      summary: Returns client config
+      description: Returns a configuration object for the requesting client
+      operationId: api_get_config
+      responses:
+        default:
+          description: Default error sample response
+      tags: [Config]
+  /boards:
+    get:
+      summary: Returns list of boards
+      description: Returns a list of accessible boards
+      operationId: api_get_boards
+      responses:
+        default:
+          description: Default error sample response
+      tags: [Boards]
+  /boards/{board_id}/threads:
+    get:
+      summary: Returns list of threads
+      description: Returns a list of threads
+      operationId: api_get_threads
+      parameters:
+        - in: path
+          name: board_id
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          description: The board ID
+      responses:
+        default:
+          description: Default error sample response
+      tags: [Boards]
+tags:
+  - name: Config
+    description: Config related resources
+  - name: Boards
+    description: Board related resources
