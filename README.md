@@ -1,5 +1,7 @@
 # lautasofta-service
 
+[![Build Status](https://travis-ci.org/Anonyymi/lautasofta-service.svg?branch=master)](https://travis-ci.org/Anonyymi/lautasofta-service)
+
 ## development
 
 Local environment is setup so that docker is used to simulate the aws cloud.
