@@ -12,5 +12,5 @@ install:
   # initialize integration test db
   - sudo mysql < ./services/db/initdb.sql
 script:
-  - flyway -configFiles=./deployment/local/flyway.conf -user=root -password='' -connectRetries=15 migrate
+  - flyway -configFiles=./deployment/local/flyway.conf -user=travis -password='' -connectRetries=15 migrate
   - python -m pytest --cov-report term --cov-report html --cov=services/web/api --cov=services/web/common --cov=services/web/thumb services/web/test/ -v
