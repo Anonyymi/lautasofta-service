@@ -9,8 +9,10 @@ install:
   - wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/6.5.5/flyway-commandline-6.5.5-linux-x64.tar.gz | tar xvz && sudo ln -s `pwd`/flyway-6.5.5/flyway /usr/local/bin
   # install python deps
   - pip install -r ./services/web/requirements.txt
+  - pip install pytest-cov
   # initialize integration test db
-  - sudo mysql < ./services/db/initdb.sql
+  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('root') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql
+  - sudo mysql -u root -p root < ./services/db/initdb.sql
 script:
-  - flyway -configFiles=./deployment/local/flyway.conf -user=travis -password='' -connectRetries=15 migrate
+  - flyway -configFiles=./deployment/local/flyway.conf -connectRetries=15 migrate
   - python -m pytest --cov-report term --cov-report html --cov=services/web/api --cov=services/web/common --cov=services/web/thumb services/web/test/ -v
