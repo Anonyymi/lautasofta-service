@@ -5,7 +5,11 @@ python:
 addons:
   mariadb: '10.4'
 install:
+  # install tools
+  - wget -qO- https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/6.5.5/flyway-commandline-6.5.5-linux-x64.tar.gz | tar xvz && sudo ln -s `pwd`/flyway-6.5.5/flyway /usr/local/bin
+  # install python deps
   - pip install -r ./services/web/requirements.txt
+  # initialize integration test db
   - sudo mysql < ./services/db/initdb.sql
 script:
   - ./run_tests.sh
