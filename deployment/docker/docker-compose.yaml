@@ -35,7 +35,7 @@ services:
       DB_USER: 'root'
       DB_PASSWD: 'root'
       DB_NAME: 'lautasofta'
-      MEDIA_BUCKET: 'lautasofta-media'
+      MEDIA_BUCKET: 'lautasofta-local-media'
       S3_ENDPOINT_URL: 'http://localhost:4566'
       ADMIN_IPS: '127.0.0.1'
     depends_on:

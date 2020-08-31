@@ -1,0 +1,11 @@
+dist: precise
+language: python
+python:
+  - "3.7"
+addons:
+  mariadb: '10.4'
+install:
+  - pip install -r ./services/web/requirements.txt
+  - sudo mysql -e < ./services/db/initdb.sql
+script:
+  - ./run_tests.sh
