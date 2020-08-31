@@ -6,6 +6,6 @@ addons:
   mariadb: '10.4'
 install:
   - pip install -r ./services/web/requirements.txt
-  - sudo mysql -e < ./services/db/initdb.sql
+  - sudo mysql < ./services/db/initdb.sql
 script:
   - ./run_tests.sh
