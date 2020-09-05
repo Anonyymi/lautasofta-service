@@ -10,6 +10,8 @@ install:
   # install python deps
   - pip install -r ./services/web/requirements.txt
   - pip install pytest-cov
+  # log db info
+  - sudo mysql -u root -e "select user,host,password from mysql.user;"
   # initialize integration test db
   - sudo mysql -u root < ./services/db/initdb.sql
 script:
