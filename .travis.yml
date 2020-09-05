@@ -14,7 +14,7 @@ install:
   - sudo mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');"
   - sudo mysql -u root -e "select user,host,password from mysql.user;"
   # initialize integration test db
-  - sudo mysql -u root -p root < ./services/db/initdb.sql
+  - sudo mysql --user="root" --password="root" < ./services/db/initdb.sql
 script:
   - sudo flyway -configFiles=./deployment/local/flyway.conf -connectRetries=15 migrate
   - python -m pytest --cov-report term --cov-report html --cov=services/web/api --cov=services/web/common --cov=services/web/thumb services/web/test/ -v
