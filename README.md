@@ -21,7 +21,7 @@ DB_PASSWORD="your_db_pass" docker-compose -p lautasofta_service -f ./deployment/
 
 #### Deploy to remote machine example
 ```bash
-DOCKER_HOST="server@remote.addr" DB_PASSWORD="your_db_pass" docker-compose -p lautasofta_service -f ./deployment/docker/docker-compose.yaml up -d
+DOCKER_HOST="ssh://server@remote.addr" DB_PASSWORD="your_db_pass" docker-compose -p lautasofta_service -f ./deployment/docker/docker-compose.yaml up -d
 ```
 
 ### AWS

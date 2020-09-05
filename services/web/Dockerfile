@@ -33,4 +33,4 @@ RUN chown -R app:app $APP_HOME
 USER app
 
 # start the server
-CMD gunicorn --log-level=debug -b 0.0.0.0:5000 api.app:app
+CMD gunicorn --log-level=debug -b 0.0.0.0:5125 api.app:app
