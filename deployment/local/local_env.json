@@ -4,8 +4,9 @@
     "DB_USER":          "root",
     "DB_PASSWD":        "root",
     "DB_NAME":          "lautasofta",
-    "MEDIA_BUCKET":     "lautasofta-local-media",
-    "S3_ENDPOINT_URL":  "http://localhost:4566",
-    "ADMIN_IPS":        "127.0.0.1"
+    "ADMIN_IPS":        "127.0.0.1",
+    "UPLOAD_LOCAL_URL": "http://localhost:3002/uploads",
+    "UPLOAD_S3_URL":    "http://localhost:4566",
+    "UPLOAD_S3_BUCKET": "lautasofta-media"
   }
 }

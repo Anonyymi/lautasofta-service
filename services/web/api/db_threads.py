@@ -17,9 +17,9 @@ def select_threads(board_id, limit, offset):
         t.id AS id,
         t.board_id AS board_id,
         t.thread_id AS thread_id,
-        t.data_message AS data_message,
-        t.data_filepath AS data_filepath,
-        t.data_thumbpath AS data_thumbpath,
+        t.content AS content,
+        f.filepath AS filepath,
+        ft.filepath AS thumbpath,
         DATE_FORMAT(t.datetime_created, '%%m/%%d/%%y(%%a)%%T') AS datetime_created,
         DATE_FORMAT(t.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited,
         (
@@ -32,6 +32,8 @@ def select_threads(board_id, limit, offset):
           LIMIT 1
         ) AS ban_reason
       FROM posts AS t
+      JOIN files AS f ON f.uuid = t.file_uuid
+      JOIN files AS ft ON ft.uuid = t.file_thumb_uuid
       WHERE (t.board_id = %s AND t.thread_id IS NULL) AND t.deleted = false
       ORDER BY t.timestamp_bumped DESC
       LIMIT %s OFFSET %s
@@ -44,9 +46,9 @@ def select_threads(board_id, limit, offset):
             p.id AS id,
             p.board_id AS board_id,
             p.thread_id AS thread_id,
-            p.data_message AS data_message,
-            p.data_filepath AS data_filepath,
-            p.data_thumbpath AS data_thumbpath,
+            p.content AS content,
+            f.filepath AS filepath,
+            ft.filepath AS thumbpath,
             DATE_FORMAT(p.datetime_created, '%%m/%%d/%%y(%%a)%%T')  AS datetime_created,
             DATE_FORMAT(p.timestamp_edited, '%%m/%%d/%%y(%%a)%%T') AS timestamp_edited,
             (
@@ -59,6 +61,8 @@ def select_threads(board_id, limit, offset):
               LIMIT 1
             ) AS ban_reason
           FROM posts AS p
+          JOIN files AS f ON f.uuid = t.file_uuid
+          JOIN files AS ft ON ft.uuid = t.file_thumb_uuid
           WHERE (p.board_id = %s AND p.thread_id = %s) AND p.deleted = false
           ORDER BY p.datetime_created DESC
           LIMIT 3 OFFSET 0
@@ -143,7 +147,7 @@ def insert_thread(board_id, thread, ipv4_addr):
 
       # insert thread
       rows_thread = cursor.execute("""
-        INSERT INTO posts (board_id, data_message, data_filepath, ipv4_addr)
+        INSERT INTO posts (board_id, content, data_filepath, ipv4_addr)
         VALUES (%s, %s, %s, INET_ATON(%s))
       """, (board_id, thread['message'], file_upload_info['fields']['key'], ipv4_addr,))
       id_inserted = cursor.lastrowid
